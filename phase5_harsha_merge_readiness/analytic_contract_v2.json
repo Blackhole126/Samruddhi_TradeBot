@@ -1,0 +1,17 @@
+{
+    "schema_version": "v1",
+    "request_id": "REQ_xxx",
+    "trace_id": "TRACE_xxx",
+    "timestamp_utc": "2026-05-20T10:30:00Z",
+    "provenance_metadata": {
+        "source": "api_server",
+        "runtime": "mcp_adapter",
+        "execution_mode": "live",
+        "environment": "production",
+        "service": "prediction_service",
+        "component": "signal_generator",
+        "host": "server_01",
+        "region": "ap-south-1"
+    },
+    "payload": {}
+}
