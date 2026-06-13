@@ -1,6 +1,5 @@
 from dataclasses import dataclass, asdict
-from backend.core.time_utils import utc_iso
-
+from core.time_utils import utc_iso
 
 @dataclass(frozen=True)
 class ReplayEvent:

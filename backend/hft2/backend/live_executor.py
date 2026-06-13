@@ -11,6 +11,12 @@ import time
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple, Any
 from dhan_client import DhanAPIClient
+from replay.replay_event import ReplayEvent
+from replay.replay_store import persist_replay_event
+from backend.core.time_utils import utc_iso
+from observability.observability_event import ObservabilityEvent
+from observability.observability_store import persist_observability_event
+from observability.failure_tracker import build_failure_event
 
 # Import database portfolio manager
 try:
@@ -667,6 +673,43 @@ class LiveTradingExecutor:
                 logger.info(f"   Order ID: {order_id}")
                 logger.info(
                     f"   Check your Dhan app/web terminal to confirm order status")
+                
+                # PHASE 2 REPLAY AUTHORITY CONVERGENCE
+                persist_replay_event(
+                    ReplayEvent(
+                        schema_version="2.0",
+                        request_id=f"BUY_{order_id}",
+                        trace_id=str(order_id),
+                        timestamp_utc=utc_iso(),
+                        event_type="TRADE_EXECUTED",
+                        source="LiveTradingExecutor",
+                        payload={
+                            "symbol": symbol,
+                            "side": "BUY",
+                            "quantity": adjusted_quantity,
+                            "order_id": order_id
+                        }
+                    )
+                )
+
+                persist_observability_event(
+                    ObservabilityEvent(
+                        schema_version="1.0",
+                        request_id=f"BUY_{order_id}",
+                        trace_id=str(order_id),
+                        timestamp_utc=utc_iso(),
+                        event_type="BUY_SUCCESS",
+                        runtime_region="execution",
+                        severity="info",
+                        message=f"BUY executed for {symbol}",
+                        payload={
+                            "symbol": symbol,
+                            "quantity": adjusted_quantity,
+                            "order_id": order_id
+                        }
+                    )
+                )
+
 
                 return {
                     "success": True,
@@ -687,6 +730,40 @@ class LiveTradingExecutor:
             return {"success": False, "message": f"Security ID validation failed for {symbol}"}
         except Exception as e:
             logger.error(f"❌ Failed to execute buy order for {symbol}: {e}")
+
+            persist_replay_event(
+                ReplayEvent(
+                    schema_version="2.0",
+                    request_id=f"FAILED_BUY_{symbol}",
+                    trace_id=f"FAILED_BUY_{symbol}_{int(time.time())}",
+                    timestamp_utc=utc_iso(),
+                    event_type="TRADE_FAILED",
+                    source="LiveTradingExecutor",
+                    payload={
+                        "symbol": symbol,
+                        "side": "BUY",
+                        "error": str(e)
+                    }
+                )
+            )
+
+            persist_observability_event(
+                ObservabilityEvent(
+                    schema_version="1.0",
+                    request_id=f"FAILED_BUY_{symbol}",
+                    trace_id=f"FAILED_BUY_{symbol}_{int(time.time())}",
+                    timestamp_utc=utc_iso(),
+                    event_type="BUY_FAILURE",
+                    runtime_region="execution",
+                    severity="critical",
+                    message=f"BUY failed for {symbol}",
+                    payload={
+                        "error": str(e)
+                    }
+                )
+            )
+
+
             return {"success": False, "message": f"Buy order failed: {str(e)}"}
 
     def place_order(
@@ -815,6 +892,44 @@ class LiveTradingExecutor:
                         f"   Check your Dhan app/web terminal to confirm order status")
                     logger.info(
                         f"   Realized P&L: Rs.{pnl:.2f} ({'Profit' if pnl > 0 else 'Loss'})")
+                    
+                    # PHASE 2 REPLAY AUTHORITY CONVERGENCE
+                    persist_replay_event(
+                        ReplayEvent(
+                            schema_version="2.0",
+                            request_id=f"SELL_{order_id}",
+                            trace_id=str(order_id),
+                            timestamp_utc=utc_iso(),
+                            event_type="TRADE_EXECUTED",
+                            source="LiveTradingExecutor",
+                            payload={
+                                "symbol": symbol,
+                                "side": "SELL",
+                                "quantity": sell_qty,
+                                "order_id": order_id
+                            }
+                        )
+                    )
+
+                    persist_observability_event(
+                        ObservabilityEvent(
+                            schema_version="1.0",
+                            request_id=f"SELL_{order_id}",
+                            trace_id=str(order_id),
+                            timestamp_utc=utc_iso(),
+                            event_type="SELL_SUCCESS",
+                            runtime_region="execution",
+                            severity="info",
+                            message=f"SELL executed for {symbol}",
+                            payload={
+                                "symbol": symbol,
+                                "quantity": sell_qty,
+                                "order_id": order_id
+                            }
+                        )
+                    )
+
+
 
                     return {
                         "success": True,
@@ -839,6 +954,39 @@ class LiveTradingExecutor:
             return {"success": False, "message": f"Security ID validation failed for {symbol}"}
         except Exception as e:
             logger.error(f"❌ Error executing sell order for {symbol}: {e}")
+
+            persist_replay_event(
+                ReplayEvent(
+                    schema_version="2.0",
+                    request_id=f"FAILED_SELL_{symbol}",
+                    trace_id=f"FAILED_SELL_{symbol}_{int(time.time())}",
+                    timestamp_utc=utc_iso(),
+                    event_type="TRADE_FAILED",
+                    source="LiveTradingExecutor",
+                    payload={
+                        "symbol": symbol,
+                        "side": "SELL",
+                        "error": str(e)
+                    }
+                )
+            )
+
+            persist_observability_event(
+                ObservabilityEvent(
+                    schema_version="1.0",
+                    request_id=f"FAILED_SELL_{symbol}",
+                    trace_id=f"FAILED_SELL_{symbol}_{int(time.time())}",
+                    timestamp_utc=utc_iso(),
+                    event_type="SELL_FAILURE",
+                    runtime_region="execution",
+                    severity="critical",
+                    message=f"SELL failed for {symbol}",
+                    payload={
+                        "error": str(e)
+                    }
+                )
+            )
+
             return {"success": False, "message": f"Sell order failed: {str(e)}"}
 
     def check_and_update_orders(self) -> List[Dict]:

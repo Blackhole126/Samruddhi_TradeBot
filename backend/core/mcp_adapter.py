@@ -10,6 +10,7 @@ from datetime import datetime
 from typing import List, Dict, Optional, Any
 from pathlib import Path
 import sys
+from core.execution_contract import build_execution_contract
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -50,11 +51,21 @@ class MCPAdapter:
         """Log incoming request"""
         self.request_counter += 1
         request_id = f"{tool_name}_{int(time.time())}_{self.request_counter}"
+        trace_id = f"TRACE_{request_id}"
         
+        contract = build_execution_contract(
+            request_id=request_id,
+            trace_id=trace_id,
+            payload=request_data,
+            source="MCPAdapter"
+        )
+
         log_entry = {
             "request_id": request_id,
+            "trace_id": trace_id,
             "tool": tool_name,
             "timestamp": datetime.now().isoformat(),
+            "contract": contract,
             "request": request_data
         }
         

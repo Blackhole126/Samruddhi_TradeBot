@@ -39,26 +39,18 @@ def get_portfolio_for_request_user() -> Optional[Dict[str, Any]]:
         return None
 
 
+# EXECUTION AUTHORITY CONVERGENCE
+# Deprecated during AI-Augmented Convergence Sprint.
+# Order execution authority belongs exclusively to LiveTradingExecutor.
+# This path intentionally blocked to prevent broker bypasses.
+
 def place_order_for_request_user(
-    symbol: str, side: str, quantity: int,
-    product_type: str = "CNC", trigger_price: Optional[float] = None,
-) -> Optional[Dict[str, Any]]:
-    """Place order for the request user if context is set; uses universal broker adapter (any registered broker)."""
-    ctx = get_mcp_user_context()
-    if not ctx or not ctx.get("demat"):
-        return None
-    demat = ctx["demat"]
-    if not demat.get("access_token") or not demat.get("client_id"):
-        return None
-    try:
-        from broker_adapter import place_order as broker_place_order
-        return broker_place_order(
-            demat,
-            symbol=symbol,
-            side=side,
-            quantity=quantity,
-            product_type=product_type,
-            trigger_price=trigger_price,
-        )
-    except Exception:
-        return None
+    symbol: str,
+    side: str,
+    quantity: int,
+    product_type: str = "CNC",
+    trigger_price=None,
+):
+    raise RuntimeError(
+        "Deprecated execution path. All order execution must route through LiveTradingExecutor."
+    )
