@@ -2,7 +2,7 @@
 from fyers_apiv3 import fyersModel
 
 # Define your Fyers API credentials
-client_id = "9SUZA2X41H-100"  # Replace with your client ID
+client_id = "9100SUZA2X41H-"  # Replace with your client ID
 secret_key = "VWUJ20PJSG"  # Replace with your secret key
 redirect_uri = "https://www.google.com/"  # Replace with your redirect URI
 response_type = "code" 

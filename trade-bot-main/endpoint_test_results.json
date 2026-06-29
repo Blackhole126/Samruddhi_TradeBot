@@ -1,0 +1,325 @@
+[
+  {
+    "endpoint": "/",
+    "method": "GET",
+    "status_code": 200,
+    "response_time_ms": 4.03,
+    "success": true,
+    "response": {
+      "name": "Stock Prediction MCP API",
+      "version": "4.0",
+      "description": "MCP-style REST API with open access, rate limiting, and validation",
+      "authentication": "DISABLED - Open access to all endpoints",
+      "auth_status": "disabled",
+      "endpoints": {
+        "/": "GET - API information",
+        "/auth/status": "GET - Check rate limit status",
+        "/tools/health": "GET - System health",
+        "/tools/predict": "POST - Generate predictions (NO AUTH)",
+        "/tools/predict/async": "POST - Start prediction, returns job_id; poll /tools/predict/result/{job_id}",
+        "/tools/predict/result/{job_id}": "GET - Get async prediction result (202=running, 200=done)",
+        "/tools/scan_all": "POST - Scan and rank symbols (NO AUTH)",
+        "/tools/analyze": "POST - Analyze with risk parameters (NO AUTH)",
+        "/tools/feedback": "POST - Provide feedback (NO AUTH)",
+        "/tools/train_rl": "POST - Train RL agent (NO AUTH)",
+        "/tools/fetch_data": "POST - Fetch batch data (NO AUTH)",
+        "/live/price/{symbol}": "GET - Get live current price (NO AUTH)",
+        "/data/transparency/{symbol}": "GET - Data source transparency (NO AUTH)"
+      },
+      "rate_limits": {
+        "per_minute": 10,
+        "per_hour": 100
+      },
+      "documentation": {
+        "swagger_ui": "/docs",
+        "redoc": "/redoc"
+      }
+    }
+  },
+  {
+    "endpoint": "/tools/health",
+    "method": "GET",
+    "status_code": 200,
+    "response_time_ms": 1002.45,
+    "success": true,
+    "response": {
+      "status": "healthy",
+      "timestamp": "2026-06-06T12:04:09.958903",
+      "system": {
+        "cpu_usage_percent": 3.8,
+        "memory_total_gb": 31.91,
+        "memory_used_gb": 13.49,
+        "memory_available_gb": 18.42,
+        "memory_percent": 42.3,
+        "disk_total_gb": 476.07,
+        "disk_used_gb": 391.82,
+        "disk_free_gb": 84.25,
+        "disk_percent": 82.3
+      },
+      "models": {
+        "available": true,
+        "total_trained": 40
+      }
+    }
+  },
+  {
+    "endpoint": "/auth/status",
+    "method": "GET",
+    "status_code": 200,
+    "response_time_ms": 1.01,
+    "success": true,
+    "response": {
+      "client_ip": "127.0.0.1",
+      "requests_last_minute": 0,
+      "requests_last_hour": 13,
+      "limit_per_minute": 10,
+      "limit_per_hour": 100,
+      "remaining_minute": 10,
+      "remaining_hour": 87
+    }
+  },
+  {
+    "endpoint": "/tools/predict",
+    "method": "POST",
+    "status_code": 200,
+    "response_time_ms": 9.88,
+    "success": true,
+    "response": {
+      "metadata": {
+        "count": 1,
+        "horizon": "intraday",
+        "risk_profile": "moderate",
+        "timestamp": "2026-06-06T12:04:09.968465",
+        "request_id": "predict_1780727649_13"
+      },
+      "predictions": [
+        {
+          "symbol": "AAPL",
+          "horizon": "intraday",
+          "error": "Model training failed",
+          "data_status": {
+            "data_source": "CACHED_YAHOO_FINANCE",
+            "data_freshness_seconds": 0,
+            "market_context": "NORMAL"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "endpoint": "/tools/predict",
+    "method": "POST",
+    "status_code": 200,
+    "response_time_ms": 26.49,
+    "success": true,
+    "response": {
+      "metadata": {
+        "count": 3,
+        "horizon": "intraday",
+        "risk_profile": "moderate",
+        "timestamp": "2026-06-06T12:04:09.996273",
+        "request_id": "predict_1780727649_14"
+      },
+      "predictions": [
+        {
+          "symbol": "AAPL",
+          "horizon": "intraday",
+          "error": "Model training failed",
+          "data_status": {
+            "data_source": "CACHED_YAHOO_FINANCE",
+            "data_freshness_seconds": 0,
+            "market_context": "NORMAL"
+          }
+        },
+        {
+          "symbol": "GOOGL",
+          "horizon": "intraday",
+          "error": "Model training failed",
+          "data_status": {
+            "data_source": "CACHED_YAHOO_FINANCE",
+            "data_freshness_seconds": 0,
+            "market_context": "NORMAL"
+          }
+        },
+        {
+          "symbol": "MSFT",
+          "horizon": "intraday",
+          "error": "Training failed: Mixed timezones detected. Pass utc=True in to_datetime or tz='UTC' in DatetimeIndex to convert to a common timezone.",
+          "data_status": {
+            "data_source": "CACHED_YAHOO_FINANCE",
+            "data_freshness_seconds": 0,
+            "market_context": "NORMAL"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "endpoint": "/tools/scan_all",
+    "method": "POST",
+    "status_code": 200,
+    "response_time_ms": 26.57,
+    "success": true,
+    "response": {
+      "metadata": {
+        "total_scanned": 3,
+        "predictions_generated": 0,
+        "shortlist_count": 0,
+        "horizon": "intraday",
+        "min_confidence": 0.3,
+        "timestamp": "2026-06-06T12:04:10.021480",
+        "request_id": "scan_all_1780727649_15"
+      },
+      "shortlist": [],
+      "all_predictions": []
+    }
+  },
+  {
+    "endpoint": "/tools/analyze",
+    "method": "POST",
+    "status_code": 200,
+    "response_time_ms": 8.3,
+    "success": true,
+    "response": {
+      "metadata": {
+        "symbol": "AAPL",
+        "horizons": [
+          "intraday"
+        ],
+        "count": 1,
+        "average_confidence": 0.0,
+        "consensus": "Mixed signals - Exercise caution",
+        "risk_parameters": {
+          "stop_loss_pct": 2.0,
+          "capital_risk_pct": 1.0,
+          "drawdown_limit_pct": 5.0
+        },
+        "timestamp": "2026-06-06T12:04:10.029901",
+        "request_id": "analyze_1780727650_16"
+      },
+      "predictions": [
+        {
+          "symbol": "AAPL",
+          "horizon": "intraday",
+          "error": "Model training failed"
+        }
+      ]
+    }
+  },
+  {
+    "endpoint": "/tools/feedback",
+    "method": "POST",
+    "status_code": 200,
+    "response_time_ms": 11.29,
+    "success": true,
+    "response": {
+      "status": "success",
+      "message": "Feedback recorded for AAPL",
+      "feedback_entry": {
+        "symbol": "AAPL",
+        "predicted_action": "LONG",
+        "user_feedback": "correct",
+        "actual_return": 2.5,
+        "timestamp": "2026-06-06T12:04:10.042326"
+      },
+      "validation": null,
+      "statistics": {
+        "total_feedback_count": 3,
+        "symbol_feedback_count": 3,
+        "correct": 3,
+        "incorrect": 0,
+        "accuracy": 100.0
+      },
+      "next_steps": {
+        "message": "Feedback saved to memory",
+        "suggestion": "Use /tools/train_rl with force_retrain=true to fine-tune the model with this feedback"
+      },
+      "timestamp": "2026-06-06T12:04:10.042326",
+      "request_id": "feedback_1780727650_17"
+    }
+  },
+  {
+    "endpoint": "/tools/train_rl",
+    "method": "POST",
+    "status_code": 200,
+    "response_time_ms": 9.31,
+    "success": true,
+    "response": {
+      "status": "failed",
+      "message": "Model training failed. Check if data/features exist.",
+      "symbol": "AAPL",
+      "horizon": "intraday"
+    }
+  },
+  {
+    "endpoint": "/tools/fetch_data",
+    "method": "POST",
+    "status_code": 200,
+    "response_time_ms": 8.12,
+    "success": true,
+    "response": {
+      "metadata": {
+        "total_symbols": 2,
+        "successful": 0,
+        "cached": 2,
+        "failed": 0,
+        "period": "2y",
+        "include_features": false,
+        "force_refresh": false,
+        "timestamp": "2026-06-06T12:04:10.058790",
+        "request_id": "fetch_data_1780727650_19"
+      },
+      "results": [
+        {
+          "symbol": "AAPL",
+          "status": "cached",
+          "message": "Data already cached",
+          "rows": 22,
+          "date_range": {
+            "start": "2026-05-04 00:00:00",
+            "end": "2026-06-03 00:00:00"
+          },
+          "latest_price": 310.26
+        },
+        {
+          "symbol": "GOOGL",
+          "status": "cached",
+          "message": "Data already cached",
+          "rows": 22,
+          "date_range": {
+            "start": "2026-05-05 00:00:00",
+            "end": "2026-06-04 00:00:00"
+          },
+          "latest_price": 372.19
+        }
+      ]
+    }
+  },
+  {
+    "endpoint": "/api/risk/assess",
+    "method": "POST",
+    "status_code": 404,
+    "response_time_ms": 3.1,
+    "success": false,
+    "response": "{'detail': 'Not Found'}",
+    "error": "HTTP 404"
+  },
+  {
+    "endpoint": "/api/risk/stop-loss",
+    "method": "POST",
+    "status_code": 404,
+    "response_time_ms": 3.11,
+    "success": false,
+    "response": "{'detail': 'Not Found'}",
+    "error": "HTTP 404"
+  },
+  {
+    "endpoint": "/api/ai/chat",
+    "method": "POST",
+    "status_code": 404,
+    "response_time_ms": 2.01,
+    "success": false,
+    "response": "{'detail': 'Not Found'}",
+    "error": "HTTP 404"
+  }
+]

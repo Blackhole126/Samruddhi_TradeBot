@@ -204,6 +204,11 @@ def _looks_like_jwt(value: Optional[str]) -> bool:
     return bool(value and str(value).strip().startswith("eyJ"))
 
 
+def _looks_like_dhan_client_id(value: str) -> bool:
+    """Dhan client IDs are purely numeric strings (e.g. '1107954503')."""
+    return bool(value and value.strip().isdigit())
+
+
 def _dhan_client_id_from_jwt(token: Optional[str]) -> Optional[str]:
     """Extract dhanClientId from a Dhan JWT without verifying the signature."""
     try:
@@ -234,6 +239,16 @@ def _normalize_demat_credentials(client_id: Optional[str], access_token: Optiona
         extracted_cid = _dhan_client_id_from_jwt(cid)
         if extracted_cid:
             logger.warning("Detected JWT stored as Dhan client ID; using dhanClientId from token payload.")
+            return extracted_cid, token
+
+    # client_id is non-numeric (e.g. a username was stored by mistake) — extract from JWT payload
+    if cid and not _looks_like_dhan_client_id(cid) and _looks_like_jwt(token):
+        extracted_cid = _dhan_client_id_from_jwt(token)
+        if extracted_cid:
+            logger.warning(
+                f"Detected non-numeric demat client_id '{cid}' (likely a username); "
+                f"using dhanClientId '{extracted_cid}' from token payload."
+            )
             return extracted_cid, token
 
     if not cid and _looks_like_jwt(token):

@@ -480,8 +480,9 @@ def get_live_portfolio(access_token: Optional[str] = None, client_id: Optional[s
         if (now - cache_time) < _PORTFOLIO_CACHE_TTL:
             return _portfolio_cache.get(token)
 
-    logger.info(
-        f"[get_live_portfolio] Token: {bool(token)}, Client ID: {bool(cid)}")
+    logger.info(f"[get_live_portfolio] Token: {bool(token)}, Client ID: {bool(cid)}")
+    logger.info(f"ENV CLIENT_ID: {os.getenv('DHAN_CLIENT_ID')}")
+    logger.info(f"ENV ACCESS_TOKEN: {os.getenv('DHAN_ACCESS_TOKEN')}")
     if not token:
         logger.warning(
             "[get_live_portfolio] No Dhan token - cannot fetch portfolio")

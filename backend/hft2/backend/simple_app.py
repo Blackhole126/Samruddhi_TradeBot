@@ -15,11 +15,17 @@ from pydantic import BaseModel, Field, ConfigDict
 import uvicorn
 
 # ---- JWT / auth helpers ----
-    from hft_auth import decode_token, get_user_demat, set_user_demat, update_user_demat_token
+try:
+    from hft_auth import (
+        decode_token,
+        get_user_demat,
+        set_user_demat,
+        update_user_demat_token
+    )
     AUTH_AVAILABLE = True
+
 except ImportError:
-    AUTH_AVAILABLE = False
-    decode_token = get_user_demat = set_user_demat = update_user_demat_token = None  # type: ignore
+    AUTH_AVAILABLE = False 
 
 _bearer_scheme = HTTPBearer(auto_error=False)
 
@@ -142,8 +148,12 @@ async def status(username: Optional[str] = Depends(_get_current_username)):
 async def debug_dhan(username: Optional[str] = Depends(_get_current_username)):
     """Debug endpoint to test Dhan connection"""
     from dhan_client import get_dhan_token_for_user, get_dhan_client_id_for_user
+
     token = get_dhan_token_for_user(username) if username else None
     client_id = get_dhan_client_id_for_user(username) if username else None
+    print("TOKEN:", token)
+    print("CLIENT_ID:", client_id)
+    
     if not token:
         return {"error": "No Dhan token found for user", "token": False, "client_id": bool(client_id)}
     
