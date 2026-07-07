@@ -20,6 +20,7 @@ from ta.trend import SMAIndicator, EMAIndicator, MACD, ADXIndicator, IchimokuInd
 from typing import Dict, List, Optional, Union, Any
 import json
 import os
+import inspect
 import time
 import random
 import numpy as np
@@ -61,6 +62,17 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 # ThreadPoolExecutor and multiprocessing imports removed - not used in current implementation
+
+def _safe_construct(cls, **kwargs):
+    """Instantiate cls using only the kwargs its __init__ actually accepts."""
+    sig = inspect.signature(cls.__init__)
+    valid_keys = set(sig.parameters.keys()) - {"self"}
+    filtered = {k: v for k, v in kwargs.items() if k in valid_keys}
+    dropped = set(kwargs.keys()) - valid_keys
+    if dropped:
+        logger.warning(f"{cls.__name__}: dropping unsupported kwargs {dropped}")
+    return cls(**filtered)
+
 
 # Advanced ML and sentiment analysis imports
 try:
@@ -6322,7 +6334,8 @@ class StockTradingBot:
         self.executor = TradingExecutor(self.portfolio, config)
         self.tracker = PortfolioTracker(self.portfolio, config)
         self.reporter = PerformanceReport(self.portfolio)
-        self.stock_analyzer = Stock(
+        self.stock_analyzer = _safe_construct(
+            Stock,
             reddit_client_id=config.get("reddit_client_id"),
             reddit_client_secret=config.get("reddit_client_secret"),
             reddit_user_agent=config.get("reddit_user_agent"),

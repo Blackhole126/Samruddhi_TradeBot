@@ -4079,7 +4079,7 @@ def get_current_saved_mode(username: Optional[str] = None) -> str:
                 return mode
     except Exception:
         pass
-    return "live"
+    return "paper"
 
 
 def set_current_saved_mode(mode: str, username: Optional[str] = None) -> None:
@@ -4463,10 +4463,11 @@ def initialize_bot(username: str = "anonymous"):
         except:
             pass
 
-        # Live trading mode only (production ready)
-        default_mode = "live"
+        # ── FIX: respect the user's saved mode instead of hardcoding "live" ──
+        saved_mode = get_current_saved_mode(username)
+        default_mode = saved_mode if saved_mode in ("paper", "live") else os.getenv("MODE", "paper")
         logger.info(
-            f"Initializing bot for {username} with mode: {default_mode}")
+            f"Initializing bot for {username} with mode: {default_mode} (saved: {saved_mode})")
 
         if CONFIG_SCHEMA_AVAILABLE:
             logger.info(f"Using schema-validated configuration for {username}")
@@ -4487,8 +4488,10 @@ def initialize_bot(username: str = "anonymous"):
                     config["tickers"] = saved_tickers
                     logger.info(
                         f"📊 Loaded {len(saved_tickers)} tickers for {username}")
-                # Live mode only - ignore saved mode from old configs
-                config["mode"] = "live"
+                # ── FIX: honor the mode stored in the saved config, don't force "live" ──
+                config["mode"] = saved_config.get("mode", default_mode)
+            else:
+                config["mode"] = default_mode
         else:
             logger.warning(
                 "Configuration schema not available, using legacy loading")
@@ -4517,8 +4520,9 @@ def initialize_bot(username: str = "anonymous"):
             saved_config = load_config_from_file(
                 default_mode, username=username)
             if saved_config:
+                # ── FIX: was referencing an undefined `saved_mode` variable here before ──
                 config.update({
-                    "mode": saved_mode,
+                    "mode": saved_config.get("mode", default_mode),
                     "riskLevel": saved_config.get("riskLevel", config["riskLevel"]),
                     "stop_loss_pct": saved_config.get("stop_loss_pct", config["stop_loss_pct"]),
                     "max_capital_per_trade": saved_config.get("max_capital_per_trade", config["max_capital_per_trade"]),
@@ -4526,7 +4530,7 @@ def initialize_bot(username: str = "anonymous"):
                     "tickers": saved_config.get("tickers", [])
                 })
 
-        # Apply user context if pending
+        # Apply user context if pending (per-user state, NOT globals — keeps isolation)
         pending = state.get("_pending_bot_user_context")
         if pending and isinstance(pending, dict):
             if pending.get("user_id"):
@@ -4537,6 +4541,13 @@ def initialize_bot(username: str = "anonymous"):
                 config["dhan_access_token"] = pending["dhan_access_token"]
             state["_pending_bot_user_context"] = None
             logger.info(f"Applied pending user context for {username}")
+
+        logger.info(f"Config before WebTradingBot initialization for {username}:")
+        logger.info(f"  Mode: {config.get('mode')}")
+        logger.info(
+            f"  Dhan Client ID: {'SET' if config.get('dhan_client_id') else 'MISSING'}")
+        logger.info(
+            f"  Dhan Access Token: {'SET' if config.get('dhan_access_token') else 'MISSING'}")
 
         import time as _time_mod
         _max_init_retries = 3
@@ -4564,7 +4575,6 @@ def initialize_bot(username: str = "anonymous"):
 
             state["trading_bot"] = bot_instance
 
-            # Initialize signal filtering layer for this user
             try:
                 signal_filter = get_signal_filter(config)
                 signal_filter.start_new_cycle()
@@ -4574,7 +4584,6 @@ def initialize_bot(username: str = "anonymous"):
                 logger.warning(
                     f"Signal filter initialization failed for {username}: {sf_err}")
 
-            # Start sync service for this user if in live mode
             if LIVE_TRADING_AVAILABLE and config.get("mode") == "live":
                 try:
                     from dhan_sync_service import start_sync_service
@@ -4605,7 +4614,6 @@ def initialize_bot(username: str = "anonymous"):
         logger.error(f"Error initializing trading bot for {username}: {e}")
         state["trading_bot"] = None
         return None
-        # raise  # Don't raise in thread, just log
 
 
 # Static file serving
@@ -6414,6 +6422,8 @@ async def get_bot_data(user=Depends(get_current_user_required)):
     now = time.time()
 
     # ─── LIVE MODE: Always try to fetch real Dhan data ───────────────────────
+    logger.info(f"[DEBUG] saved_mode = {saved_mode}")
+    logger.info(f"[DEBUG] current_saved_mode = {get_current_saved_mode(username)}")
     if saved_mode == "live":
         cached = state.get("_bot_data_cache")
         cache_age = now - state.get("_bot_data_cache_ts", 0)
@@ -7481,8 +7491,13 @@ async def update_settings(request: SettingsRequest, user_demat: tuple = Depends(
     """Update bot settings. Supports paper/live mode."""
     payload, request_user_demat = user_demat if isinstance(user_demat, tuple) else (None, None)
     username = (payload.get("sub") or "").strip() if payload and isinstance(payload, dict) else "anonymous"
+    state = get_user_state(username)
+    trading_bot = state.get("trading_bot")
 
     try:
+        logger.info("=" * 60)
+        logger.info(f"REQUEST MODE = {request.mode}")
+        logger.info("=" * 60)
         if trading_bot:
             if request.mode is not None:
                 old_mode = str(trading_bot.config.get("mode", "paper")).strip().lower()
@@ -7507,7 +7522,7 @@ async def update_settings(request: SettingsRequest, user_demat: tuple = Depends(
 
             return MessageResponse(message="Settings updated successfully")
 
-        mode = (request.mode or get_current_saved_mode() or "paper").strip().lower()
+        mode = (request.mode or get_current_saved_mode(username) or "paper").strip().lower()
         if mode not in {"paper", "live"}:
             mode = "paper"
 
@@ -7522,10 +7537,11 @@ async def update_settings(request: SettingsRequest, user_demat: tuple = Depends(
             "max_trade_limit": request.max_trade_limit if request.max_trade_limit is not None else 10,
         }
 
-        save_config_to_file(mode, config_to_save)
-        set_current_saved_mode(mode)
+        save_config_to_file(mode, config_to_save, username)
+        set_current_saved_mode(mode, username)
 
         return MessageResponse(message=f"Settings saved successfully. Mode: {mode}")
+    
 
     except Exception as e:
         logger.error(f"Error updating settings: {e}")
@@ -8487,13 +8503,17 @@ async def _ensure_mcp_initialized():
                 "ollama_model": "llama3.1:8b"
             })
 
-            execution_tool = ExecutionTool({
-                "tool_id": "execution_tool",
-                "trading_mode": "paper",
-                "max_order_value": 100000,
-                "max_position_size": 0.25,
-                "daily_loss_limit": 0.05
-            })
+            try:
+                execution_tool = ExecutionTool({
+                    "tool_id": "execution_tool",
+                    "trading_mode": "paper",
+                    "max_order_value": 100000,
+                    "max_position_size": 0.25,
+                    "daily_loss_limit": 0.05
+                })
+            except Exception as e:
+                logger.warning(f"ExecutionTool unavailable (no live executor in paper mode): {e}")
+                execution_tool = None
 
             portfolio_tool = PortfolioTool({
                 "tool_id": "portfolio_tool",
@@ -8573,24 +8593,28 @@ async def _ensure_mcp_initialized():
             )
 
             # Register execution tool
-            mcp_server.register_tool(
-                name="execute_trade",
-                function=execution_tool.execute_trade,
-                description="Execute a trade order with comprehensive risk checks",
-                schema={
-                    "type": "object",
-                    "properties": {
-                        "symbol": {"type": "string"},
-                        "side": {"type": "string"},
-                        "quantity": {"type": "number"},
-                        "order_type": {"type": "string"},
-                        "price": {"type": "number"},
-                        "stop_loss": {"type": "number"},
-                        "take_profit": {"type": "number"}
-                    },
-                    "required": ["symbol", "side", "quantity"]
-                }
-            )
+                        # Register execution tool (only if it initialized successfully)
+            if execution_tool:
+                mcp_server.register_tool(
+                    name="execute_trade",
+                    function=execution_tool.execute_trade,
+                    description="Execute a trade order with comprehensive risk checks",
+                    schema={
+                        "type": "object",
+                        "properties": {
+                            "symbol": {"type": "string"},
+                            "side": {"type": "string"},
+                            "quantity": {"type": "number"},
+                            "order_type": {"type": "string"},
+                            "price": {"type": "number"},
+                            "stop_loss": {"type": "number"},
+                            "take_profit": {"type": "number"}
+                        },
+                        "required": ["symbol", "side", "quantity"]
+                    }
+                )
+            else:
+                logger.info("Skipping 'execute_trade' MCP tool registration — no live executor available")
 
             # Register portfolio analysis tool
             mcp_server.register_tool(
