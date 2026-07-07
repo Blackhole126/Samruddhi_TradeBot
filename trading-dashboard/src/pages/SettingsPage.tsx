@@ -16,6 +16,7 @@ interface UserPreferences {
   autoRefresh: boolean;
   showHealthStatus: boolean;
   itemsPerPage: number;
+  tradingMode: 'paper' | 'live';
 }
 
 const defaultPreferences: UserPreferences = {
@@ -24,6 +25,7 @@ const defaultPreferences: UserPreferences = {
   autoRefresh: true,
   showHealthStatus: true,
   itemsPerPage: 20,
+  tradingMode: 'paper',
 };
 
 const SettingsPage = () => {
@@ -273,6 +275,45 @@ const SettingsPage = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Default Prediction Horizon</label>
+              <div className="border-t border-slate-700 pt-4">
+                <label className="block text-sm font-medium text-gray-300 mb-2">Trading Mode</label>
+                <div className="flex gap-3">
+                  <label
+                    className={`flex-1 flex items-center justify-center gap-2 rounded-lg border px-4 py-3 cursor-pointer transition-all ${preferences.tradingMode === 'paper'
+                        ? 'border-blue-500 bg-blue-500/20 text-white'
+                        : 'border-slate-600 bg-slate-700 text-gray-300 hover:border-slate-500'
+                      }`}
+                  >
+                    <input
+                      type="radio"
+                      name="tradingMode"
+                      value="paper"
+                      checked={preferences.tradingMode === 'paper'}
+                      onChange={(e) => setPreferences({ ...preferences, tradingMode: e.target.value as 'paper' | 'live' })}
+                      className="mr-2"
+                    />
+                    Paper
+                  </label>
+
+                  <label
+                    className={`flex-1 flex items-center justify-center gap-2 rounded-lg border px-4 py-3 cursor-pointer transition-all ${preferences.tradingMode === 'live'
+                        ? 'border-blue-500 bg-blue-500/20 text-white'
+                        : 'border-slate-600 bg-slate-700 text-gray-300 hover:border-slate-500'
+                      }`}
+                  >
+                    <input
+                      type="radio"
+                      name="tradingMode"
+                      value="live"
+                      checked={preferences.tradingMode === 'live'}
+                      onChange={(e) => setPreferences({ ...preferences, tradingMode: e.target.value as 'paper' | 'live' })}
+                      className="mr-2"
+                    />
+                    Live
+                  </label>
+                </div>
+                <p className="text-gray-400 text-xs mt-1">Choose whether new trades run in paper or live mode.</p>
+              </div>
               <select
                 value={preferences.defaultHorizon}
                 onChange={(e) => setPreferences({ ...preferences, defaultHorizon: e.target.value as any })}

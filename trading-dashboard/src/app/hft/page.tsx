@@ -10,7 +10,7 @@ import HftLoadingOverlay from '@/components/hft/HftLoadingOverlay';
 import HftSettingsModal from '@/components/hft/HftSettingsModal';
 import { hftApiService, formatCurrency, formatPercentage, createBotStream } from '@/services/hftApiService';
 import { userAPI } from '@/services/api';
-import type { HftBotData, HftChatMessage } from '@/types/hft';
+import type { HftBotData, HftChatMessage, HftTradingMode } from '@/types/hft';
 import { CheckCircle2, AlertCircle, RefreshCw, Play, Square, LayoutDashboard, Briefcase, MessageCircle, Loader2 } from 'lucide-react';
 
 export default function HftPage() {
@@ -28,7 +28,7 @@ export default function HftPage() {
             startingBalance: 0
         },
         config: {
-            mode: 'live',
+            mode: 'paper',
             tickers: [],
             riskLevel: 'MEDIUM',
             maxAllocation: 0.25
@@ -169,7 +169,7 @@ export default function HftPage() {
         try {
             const data = await hftApiService.getBotData();
             // Ensure mode is properly set from backend response
-            const backendMode = data?.config?.mode || 'live';
+            const backendMode: HftTradingMode = data?.config?.mode === 'live' ? 'live' : 'paper';
             // Also fetch watchlist directly to ensure we have the latest
             let watchlistTickers: string[] = [];
             try {
@@ -339,8 +339,21 @@ export default function HftPage() {
     const handleSaveSettings = async (settings: any) => {
         try {
             setLoading(true);
-            await hftApiService.updateSettings(settings);
-            toast.success('Settings saved successfully!');
+            const result = await hftApiService.updateSettings(settings);
+            if (result.mode === 'paper' || result.mode === 'live') {
+                setBotData(prev => ({
+                    ...prev,
+                    config: {
+                        ...prev.config,
+                        mode: result.mode as HftTradingMode,
+                    },
+                }));
+            }
+            if (result.reverted) {
+                toast.error(result.message || 'Live mode unavailable; reverted to paper mode');
+            } else {
+                toast.success(result.message || 'Settings saved successfully!');
+            }
             setShowSettings(false);
             // Refresh data multiple times to ensure live mode is reflected
             await refreshData();
@@ -355,7 +368,7 @@ export default function HftPage() {
         }
     };
 
-    const mode = 'live'; // Hardcoding to live mode
+    const tradingMode: HftTradingMode = botData.config?.mode === 'live' ? 'live' : 'paper';
     const cash = botData.portfolio.cash || 0;
 
     // Invested value: from Dhan API (cost basis). Fall back to computing if not sent.
@@ -403,8 +416,24 @@ export default function HftPage() {
                                         </div>
                                     )}
 
-                                    {/* Broker Connection */}
+                                    {/* Trading Mode */}
                                     {connected && (
+                                        <div
+                                            className={`flex items-center gap-1.5 px-2 py-1 border rounded-lg flex-shrink-0 ${tradingMode === 'paper'
+                                                ? 'bg-blue-500/10 border-blue-500/30'
+                                                : 'bg-red-500/10 border-red-500/30'
+                                                }`}
+                                            title={tradingMode === 'paper' ? 'Paper mode: simulated trades only' : 'Live mode: broker-backed trading'}
+                                        >
+                                            <span className={`text-[10px] font-bold uppercase tracking-wider ${tradingMode === 'paper' ? 'text-blue-400' : 'text-red-400'
+                                                }`}>
+                                                {tradingMode === 'paper' ? 'Paper Mode' : 'Live Mode'}
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    {/* Broker Connection */}
+                                    {connected && tradingMode === 'live' && (
                                         liveStatus?.connected ? (
                                             <div className="flex items-center gap-1.5 px-2 py-1 bg-blue-500/10 border border-blue-500/30 rounded-lg flex-shrink-0" title="Broker: Dhan connection validated">
                                                 <CheckCircle2 className="w-3 h-3 text-blue-400" />
@@ -475,7 +504,7 @@ export default function HftPage() {
                             {globalBotStatus === 'INITIALIZING' ? (
                                 <><Loader2 className="w-4 h-4 animate-spin" /> Initializing...</>
                             ) : (
-                                <><Play className="w-4 h-4" /> Start Trading</>
+                                <><Play className="w-4 h-4" /> {tradingMode === 'paper' ? 'Start Paper Trading' : 'Start Trading'}</>
                             )}
                         </button>
                         <button

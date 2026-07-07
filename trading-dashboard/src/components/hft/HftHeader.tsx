@@ -199,7 +199,10 @@ const HftHeader: React.FC<HftHeaderProps> = ({
                 <Title>💵 BlackHole Trading Bot</Title>
 
                 <HeaderControls>
-                    {/* Trading Mode Indicator: Hardcoded to Live Mode now */}
+                    <ModeIndicator mode={botData.config.mode}>
+                        <StatusDot mode={botData.config.mode} $connected={liveStatus?.connected ?? false} />
+                        <span>{botData.config.mode === 'live' ? 'Live Mode' : 'Paper Mode'}</span>
+                    </ModeIndicator>
 
                     <StatusIndicator>
                         <BotStatusDot $active={botData.isRunning} />

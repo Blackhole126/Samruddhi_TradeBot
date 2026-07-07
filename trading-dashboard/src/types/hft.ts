@@ -1,8 +1,9 @@
 // HFT API Service Types
+export type HftTradingMode = 'paper' | 'live';
 export type ProductType = 'CNC' | 'MIS'; // CNC = Delivery, MIS = Intraday
 
 export interface HftBotConfig {
-    mode: 'live';
+    mode: HftTradingMode;
     tickers: string[];
     riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
     maxAllocation: number;
@@ -104,7 +105,7 @@ export interface HftWatchlistResponse {
 }
 
 export interface HftSettingsUpdate {
-    mode?: 'live';
+    mode?: HftTradingMode;
     riskLevel?: 'LOW' | 'MEDIUM' | 'HIGH';
     maxAllocation?: number;
     stopLoss?: number;

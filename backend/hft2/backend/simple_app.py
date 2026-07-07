@@ -309,9 +309,79 @@ async def get_settings():
     return bot_state["config"]
 
 
+def _switch_trading_mode(new_mode: str, username: Optional[str] = None) -> dict:
+    """Switch between paper and live mode with restart/revert behavior."""
+    new_mode = (new_mode or "").strip().lower()
+    if new_mode not in {"paper", "live"}:
+        logger.error(f"Invalid trading mode: {new_mode}")
+        raise HTTPException(status_code=400, detail="mode must be either 'paper' or 'live'")
+
+    old_mode = bot_state["config"].get("mode", "paper")
+    if new_mode == old_mode:
+        logger.info(f"Already in {new_mode} mode")
+        return {
+            "mode": old_mode,
+            "old_mode": old_mode,
+            "reverted": False,
+            "message": f"Already in {old_mode} mode",
+        }
+
+    was_running = bool(bot_state.get("isRunning"))
+    if was_running:
+        logger.info(f"Stopping bot before switching mode: {old_mode} -> {new_mode}")
+        bot_state["isRunning"] = False
+
+    bot_state["config"]["mode"] = new_mode
+
+    if new_mode == "live":
+        dhan_token = None
+        dhan_cid = None
+        if username:
+            from dhan_client import get_dhan_token_for_user, get_dhan_client_id_for_user
+            dhan_token = get_dhan_token_for_user(username)
+            dhan_cid = get_dhan_client_id_for_user(username)
+
+        if not dhan_token or not dhan_cid:
+            logger.error("Failed to initialize live trading; reverting to paper mode")
+            bot_state["config"]["mode"] = "paper"
+            return {
+                "mode": "paper",
+                "old_mode": old_mode,
+                "reverted": True,
+                "message": "Live trading unavailable; reverted to paper mode",
+            }
+
+        try:
+            from dhan_client import get_live_portfolio
+            live_portfolio = get_live_portfolio(access_token=dhan_token, client_id=dhan_cid)
+            if live_portfolio is None:
+                raise RuntimeError("Dhan portfolio sync returned no data")
+        except Exception as e:
+            logger.error(f"Post-switch Dhan sync failed: {e}")
+            bot_state["config"]["mode"] = "paper"
+            return {
+                "mode": "paper",
+                "old_mode": old_mode,
+                "reverted": True,
+                "message": "Live portfolio sync failed; reverted to paper mode",
+            }
+
+    if was_running:
+        bot_state["isRunning"] = True
+
+    actual_mode = bot_state["config"].get("mode", "paper")
+    logger.info(f"Successfully switched from {old_mode} to {actual_mode} mode")
+    return {
+        "mode": actual_mode,
+        "old_mode": old_mode,
+        "reverted": actual_mode != new_mode,
+        "message": f"Switched from {old_mode} to {actual_mode} mode",
+    }
+
+
 @app.post("/api/settings")
-async def update_settings(config: BotConfig):
-    bot_state["config"]["mode"] = config.mode
+async def update_settings(config: BotConfig, username: Optional[str] = Depends(_get_current_username)):
+    switch_result = _switch_trading_mode(config.mode, username=username)
     bot_state["config"]["riskLevel"] = config.risk_level
     bot_state["config"]["maxAllocation"] = config.max_allocation
     if config.stop_loss is not None:
@@ -320,7 +390,13 @@ async def update_settings(config: BotConfig):
         bot_state["config"]["targetPriceLevel"] = config.target_price_level
     if config.target_price is not None:
         bot_state["config"]["targetPrice"] = config.target_price
-    return {"status": "success", "message": "Settings updated"}
+    return {
+        "status": "success",
+        "message": switch_result["message"] if switch_result.get("reverted") else "Settings updated",
+        "mode": bot_state["config"].get("mode", "paper"),
+        "old_mode": switch_result.get("old_mode"),
+        "reverted": switch_result.get("reverted", False),
+    }
 
 
 @app.get("/api/live-status")

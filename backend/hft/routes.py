@@ -55,7 +55,7 @@ if not _hft2_backend_dir.is_dir():
 # ---------- Pydantic models ----------
 class BotConfig(BaseModel):
     model_config = {"populate_by_name": True}
-    mode: str
+    mode: str = "paper"
     risk_level: str = Field(alias="riskLevel")
     max_allocation: float = Field(alias="maxAllocation")
     stop_loss: Optional[float] = Field(None, alias="stopLoss")
@@ -169,18 +169,19 @@ def _get_dhan_live_portfolio():
 
 # ---------- Bot data & portfolio ----------
 def _hft_portfolio():
-    """Paper: empty. Live: use Dhan from env if available (single-backend / Render)."""
+    """Paper: use in-memory simulated portfolio. Live: use Dhan from env if available."""
     if bot_state.get("config", {}).get("mode") == "live":
         live = _get_dhan_live_portfolio()
         if live is not None:
             return live
-    return {
-        "totalValue": 0,
-        "cash": 0,
-        "startingBalance": 0,
-        "holdings": {},
-        "tradeLog": [],
-    }
+        return {
+            "totalValue": 0,
+            "cash": 0,
+            "startingBalance": 0,
+            "holdings": {},
+            "tradeLog": [],
+        }
+    return bot_state["portfolio"]
 
 
 @hft_router.get("/bot-data")
@@ -387,6 +388,81 @@ async def stop_bot():
     return {"status": "success", "message": "Bot stopped", "isRunning": False}
 
 
+async def _switch_trading_mode(new_mode: str) -> dict:
+    """Switch between paper and live mode with restart/revert behavior."""
+    global _last_dhan_error
+    new_mode = (new_mode or "").strip().lower()
+    if new_mode not in {"paper", "live"}:
+        logger.error("Invalid trading mode: %s", new_mode)
+        raise HTTPException(status_code=400, detail="mode must be either 'paper' or 'live'")
+
+    old_mode = bot_state["config"].get("mode", "paper")
+    if new_mode == old_mode:
+        logger.info("Already in %s mode", new_mode)
+        return {
+            "mode": old_mode,
+            "old_mode": old_mode,
+            "reverted": False,
+            "message": f"Already in {old_mode} mode",
+        }
+
+    was_running = bool(bot_state.get("isRunning"))
+    if was_running:
+        logger.info("Stopping HFT bot before switching mode: %s -> %s", old_mode, new_mode)
+        _stop_hft2_stack()
+        bot_state["isRunning"] = False
+        await asyncio.sleep(1)
+
+    bot_state["config"]["mode"] = new_mode
+
+    if new_mode == "live":
+        try:
+            import dhan_live
+            token_configured = bool(getattr(dhan_live, "get_dhan_token", None) and dhan_live.get_dhan_token())
+        except Exception as e:
+            token_configured = False
+            _last_dhan_error = str(e)
+
+        if not token_configured:
+            _last_dhan_error = "Dhan credentials are not configured. Reverted to paper mode."
+            logger.error("Failed to initialize live trading: %s", _last_dhan_error)
+            bot_state["config"]["mode"] = "paper"
+            return {
+                "mode": "paper",
+                "old_mode": old_mode,
+                "reverted": True,
+                "message": "Live trading unavailable; reverted to paper mode",
+            }
+
+        live_portfolio = _get_dhan_live_portfolio()
+        if live_portfolio is None:
+            bot_state["config"]["mode"] = "paper"
+            return {
+                "mode": "paper",
+                "old_mode": old_mode,
+                "reverted": True,
+                "message": "Live portfolio sync failed; reverted to paper mode",
+            }
+    else:
+        _last_dhan_error = None
+
+    if was_running:
+        await asyncio.sleep(1)
+        if not os.environ.get("HFT2_BACKEND_URL"):
+            _start_hft2_stack()
+            asyncio.create_task(_hft2_sync_watchlist_and_predict())
+        bot_state["isRunning"] = True
+
+    actual_mode = bot_state["config"].get("mode", "paper")
+    logger.info("Successfully switched from %s to %s mode", old_mode, actual_mode)
+    return {
+        "mode": actual_mode,
+        "old_mode": old_mode,
+        "reverted": actual_mode != new_mode,
+        "message": f"Switched from {old_mode} to {actual_mode} mode",
+    }
+
+
 # ---------- Settings ----------
 @hft_router.get("/settings")
 async def get_settings():
@@ -395,12 +471,18 @@ async def get_settings():
 
 @hft_router.post("/settings")
 async def update_settings(config: BotConfig):
-    bot_state["config"]["mode"] = config.mode
+    switch_result = await _switch_trading_mode(config.mode)
     bot_state["config"]["riskLevel"] = config.risk_level
     bot_state["config"]["maxAllocation"] = config.max_allocation
     if config.stop_loss is not None:
         bot_state["config"]["stopLoss"] = config.stop_loss
-    return {"status": "success", "message": "Settings updated"}
+    return {
+        "status": "success",
+        "message": switch_result["message"] if switch_result.get("reverted") else "Settings updated",
+        "mode": bot_state["config"].get("mode", "paper"),
+        "old_mode": switch_result.get("old_mode"),
+        "reverted": switch_result.get("reverted", False),
+    }
 
 
 # ---------- Chat ----------

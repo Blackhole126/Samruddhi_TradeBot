@@ -255,9 +255,9 @@ export const hftApiService = {
         }
     },
 
-    async updateSettings(settings: HftSettingsUpdate): Promise<{ message: string }> {
+    async updateSettings(settings: HftSettingsUpdate): Promise<{ message: string; mode?: 'paper' | 'live'; reverted?: boolean }> {
         try {
-            const response = await api.post<{ message: string }>('/settings', settings);
+            const response = await api.post<{ message: string; mode?: 'paper' | 'live'; reverted?: boolean }>('/settings', settings);
             return response.data;
         } catch (error) {
             console.error('Error updating settings:', error);

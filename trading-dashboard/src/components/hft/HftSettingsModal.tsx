@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { X, CheckCircle2, AlertCircle, Link2, RefreshCw } from 'lucide-react';
+import { X, CheckCircle2, AlertCircle, Link2, RefreshCw, ShieldCheck, CircleDollarSign } from 'lucide-react';
 import { hftApiService } from '../../services/hftApiService';
-import type { HftSettingsUpdate } from '../../types/hft';
+import type { HftSettingsUpdate, HftTradingMode } from '../../types/hft';
 
 interface SettingsFormData {
-    mode: 'live';
+    mode: HftTradingMode;
     riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CUSTOM';
     maxAllocation: number | string;
     stopLossPct: number | string;
@@ -29,7 +29,7 @@ const HftSettingsModal: React.FC<HftSettingsModalProps> = ({ settings, onSave, o
     const isSpace = theme === 'space';
 
     const [formData, setFormData] = useState<SettingsFormData>({
-        mode: 'live',
+        mode: 'paper',
         riskLevel: 'MEDIUM',
         maxAllocation: 25,
         stopLossPct: 5,
@@ -55,8 +55,9 @@ const HftSettingsModal: React.FC<HftSettingsModalProps> = ({ settings, onSave, o
 
     useEffect(() => {
         if (settings) {
+            const mode: HftTradingMode = settings.mode === 'live' ? 'live' : 'paper';
             setFormData({
-                mode: 'live',
+                mode,
                 riskLevel: settings.riskLevel || 'MEDIUM',
                 maxAllocation: settings.maxAllocation ? (settings.maxAllocation * 100) : 25,
                 stopLossPct: settings.stopLossPct || 5,
@@ -276,6 +277,9 @@ const HftSettingsModal: React.FC<HftSettingsModalProps> = ({ settings, onSave, o
     const inputDisabledBg = isLight ? 'bg-gray-100' : 'bg-slate-800';
     const selectBg = isLight ? 'bg-white' : 'bg-slate-700';
     const selectText = isLight ? 'text-gray-900' : 'text-white';
+    const modeHelpText = formData.mode === 'paper'
+        ? 'Orders are simulated and no broker order is sent.'
+        : 'Orders can use your linked broker account when execution is enabled.';
 
     return (
         <div
@@ -302,8 +306,64 @@ const HftSettingsModal: React.FC<HftSettingsModalProps> = ({ settings, onSave, o
 
                 {/* Body */}
                 <div className="p-6 space-y-6">
-                    {/* Connection Status Section - Systematic Redesign */}
-                    <div className={`p-4 rounded-xl border ${modalBorder} ${isSpace ? 'bg-slate-900/50' : 'bg-slate-50'} space-y-3`}>
+                    {/* Trading Mode */}
+                    <div>
+                        <label className={`block text-sm font-semibold mb-3 ${textPrimary}`}>
+                            Trading Mode:
+                        </label>
+                        <div className="grid grid-cols-2 gap-3">
+                            <button
+                                type="button"
+                                onClick={() => handleInputChange('mode', 'paper')}
+                                disabled={loading}
+                                className={`px-4 py-3 rounded-lg border-2 transition-all font-medium disabled:opacity-50 ${formData.mode === 'paper'
+                                    ? 'bg-blue-600 border-blue-600 text-white shadow-lg scale-105'
+                                    : `${selectBg} ${selectText} ${inputBorder} hover:border-blue-500`
+                                    }`}
+                            >
+                                <div className="flex flex-col items-center gap-1">
+                                    <ShieldCheck className="w-5 h-5" />
+                                    <span className="text-base font-bold">Paper</span>
+                                    <span className="text-xs opacity-80">Simulated trades</span>
+                                </div>
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => handleInputChange('mode', 'live')}
+                                disabled={loading}
+                                className={`px-4 py-3 rounded-lg border-2 transition-all font-medium disabled:opacity-50 ${formData.mode === 'live'
+                                    ? 'bg-red-600 border-red-600 text-white shadow-lg scale-105'
+                                    : `${selectBg} ${selectText} ${inputBorder} hover:border-red-500`
+                                    }`}
+                            >
+                                <div className="flex flex-col items-center gap-1">
+                                    <CircleDollarSign className="w-5 h-5" />
+                                    <span className="text-base font-bold">Live</span>
+                                    <span className="text-xs opacity-80">Broker-backed</span>
+                                </div>
+                            </button>
+                        </div>
+                        <p className={`text-xs mt-2 ${textMuted}`}>{modeHelpText}</p>
+                    </div>
+
+                    {formData.mode === 'paper' ? (
+                        <div className={`p-4 rounded-xl border ${modalBorder} ${isSpace ? 'bg-slate-900/50' : 'bg-blue-50'} space-y-2`}>
+                            <div className="flex items-center justify-between">
+                                <label className={`text-sm font-bold flex items-center gap-2 ${textPrimary}`}>
+                                    <ShieldCheck className="w-4 h-4 text-blue-500" /> Paper Trading
+                                </label>
+                                <span className="flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-500/20 text-blue-500 border border-blue-500/30">
+                                    No Broker
+                                </span>
+                            </div>
+                            <p className={`text-xs ${textMuted}`}>
+                                Broker linking is only required for Live mode. Paper mode keeps trade activity simulated.
+                            </p>
+                        </div>
+                    ) : (
+                        /* Connection Status Section - Systematic Redesign */
+                        <div className={`p-4 rounded-xl border ${modalBorder} ${isSpace ? 'bg-slate-900/50' : 'bg-slate-50'} space-y-3`}>
                         <div className="flex items-center justify-between">
                             <label className={`text-sm font-bold flex items-center gap-2 ${textPrimary}`}>
                                 <Link2 className="w-4 h-4 text-blue-500" /> Broker Connection
@@ -447,7 +507,8 @@ const HftSettingsModal: React.FC<HftSettingsModalProps> = ({ settings, onSave, o
                                 )}
                             </div>
                         )}
-                    </div>
+                        </div>
+                    )}
 
                     {/* Risk Level */}
                     <div>

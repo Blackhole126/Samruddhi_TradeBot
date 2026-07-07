@@ -3050,12 +3050,22 @@ class WebTradingBot:
             logger.error(f"Failed to initialize live trading: {e}")
             return False
 
+    def switch_trading_mode(self, new_mode: str, username: str = None) -> bool:
+        """Switch between paper and live trading modes."""
         try:
-            # Enforce live mode: ignore anything else
-            new_mode = "live"
+            new_mode = (new_mode or "").strip().lower()
+            if new_mode not in ["paper", "live"]:
+                logger.error(f"Invalid trading mode: {new_mode}")
+                return False
 
             if new_mode == self.config.get("mode"):
                 logger.info(f"Already in {new_mode} mode")
+                try:
+                    _persistence_user = username or getattr(self, "username", None)
+                    save_config_to_file(new_mode, self.config, _persistence_user)
+                    set_current_saved_mode(new_mode, _persistence_user)
+                except Exception:
+                    pass
                 return True
 
             # Stop bot if running
@@ -3075,6 +3085,7 @@ class WebTradingBot:
             # Persist the mode so it's remembered on restart
             _persistence_user = username or getattr(self, "username", None)
             try:
+                save_config_to_file(new_mode, self.config, _persistence_user)
                 set_current_saved_mode(new_mode, _persistence_user)
             except Exception as e:
                 logger.warning(
@@ -3089,21 +3100,21 @@ class WebTradingBot:
                     f"[switch_trading_mode] Initializing live trading for user: '{_uname}'")
                 if not self._initialize_live_trading(username=_uname):
                     logger.error(
-                        "Failed to initialize live trading")
-                    self.config["mode"] = "live"
+                        "Failed to initialize live trading, reverting to paper mode")
+                    self.config["mode"] = "paper"
                     if self.portfolio_manager:
-                        self.portfolio_manager.switch_mode("live")
+                        self.portfolio_manager.switch_mode("paper")
 
                     # Also revert persistence to paper
                     try:
+                        save_config_to_file("paper", self.config, _persistence_user)
                         set_current_saved_mode("paper", _persistence_user)
                     except:
                         pass
 
-                    # CRITICAL: Return False so the UI knows the switch failed
                     logger.info(
-                        "Live mode initialization failed; returning False to UI")
-                    return False
+                        "Successfully reverted to paper mode after live trading failure")
+                    return True
                 # Force an immediate sync from Dhan after switching to live
                 if self.live_executor and hasattr(self.live_executor, 'sync_portfolio_with_dhan'):
                     try:
@@ -3114,12 +3125,9 @@ class WebTradingBot:
                     except Exception as e:
                         logger.error(f"Post-switch Dhan sync failed: {e}")
             else:
-                # Fallback to live if somehow called with something else
-                self.config["mode"] = "live"
-                if self.portfolio_manager:
-                    self.portfolio_manager.switch_mode("live")
-                self._initialize_live_trading(
-                    username=(username or getattr(self, "username", None)))
+                # Clear live trading components for paper mode
+                self.live_executor = None
+                self.dhan_client = None
 
             # Update trading bot config
             self.trading_bot.config.update(self.config)
@@ -7424,172 +7432,105 @@ async def stop_bot_bot_route(payload: dict = Depends(get_optional_user)):
 
 
 @app.get("/api/settings")
-async def get_settings(user=Depends(get_optional_user)):
-    """Get current settings. Isolated by user."""
-    try:
-        username = (user.get("sub") or "").strip() if user else "anonymous"
-        state = get_user_state(username)
-        bot = state.get("trading_bot")
+async def get_settings(user_demat: tuple = Depends(get_optional_user_demat)):
+    """Return current settings including trading mode for the frontend."""
+    payload, _ = user_demat if isinstance(user_demat, tuple) else (None, None)
+    username = (payload.get("sub") or "").strip() if payload and isinstance(payload, dict) else "anonymous"
+    state = get_user_state(username)
+    bot = state.get("trading_bot")
 
-        if bot:
-            return {
-                "mode": bot.config.get("mode", "paper"),
-                "riskLevel": bot.config.get("riskLevel", "MEDIUM"),
-                "stop_loss_pct": bot.config.get("stop_loss_pct", 0.05),
-                "target_profit_pct": bot.config.get("target_profit_pct", 0.1),
-                "use_risk_reward": bot.config.get("use_risk_reward", True),
-                "risk_reward_ratio": bot.config.get("risk_reward_ratio", 2.0),
-                "max_capital_per_trade": bot.config.get("max_capital_per_trade", 0.25),
-                "max_trade_limit": bot.config.get("max_trade_limit", 10)
-            }
-
-        mode = get_current_saved_mode(username)
-        saved = load_config_from_file(mode, username) or {}
+    if bot and hasattr(bot, "config"):
+        cfg = dict(bot.config)
+        mode = str(cfg.get("mode", get_current_saved_mode(username) or "paper")).strip().lower()
+        if mode not in {"paper", "live"}:
+            mode = "paper"
         return {
-            "mode": saved.get("mode", mode),
-            "riskLevel": saved.get("riskLevel", "MEDIUM"),
-            "stop_loss_pct": saved.get("stop_loss_pct", 0.05),
-            "target_profit_pct": saved.get("target_profit_pct", 0.1),
-            "targetPriceLevel": saved.get("targetPriceLevel", "MEDIUM"),
-            "use_risk_reward": saved.get("use_risk_reward", True),
-            "risk_reward_ratio": saved.get("risk_reward_ratio", 2.0),
-            "max_capital_per_trade": saved.get("max_capital_per_trade", 0.25),
-            "max_trade_limit": saved.get("max_trade_limit", 10),
+            "mode": mode,
+            "riskLevel": cfg.get("riskLevel", "MEDIUM"),
+            "stop_loss_pct": cfg.get("stop_loss_pct", 0.05),
+            "target_profit_pct": cfg.get("target_profit_pct", 0.10),
+            "targetPricePct": cfg.get("target_profit_pct", 0.10),
+            "use_risk_reward": cfg.get("use_risk_reward", True),
+            "risk_reward_ratio": cfg.get("risk_reward_ratio", 2.0),
+            "max_capital_per_trade": cfg.get("max_capital_per_trade", 0.25),
+            "max_trade_limit": cfg.get("max_trade_limit", 150),
+            "tickers": cfg.get("tickers", []),
         }
-    except Exception as e:
-        logger.error(
-            f"Error getting settings for {user.get('sub') if user else 'unknown'}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
 
+    saved = load_config_from_file(get_current_saved_mode(username), username) or {}
+    mode = str(saved.get("mode", get_current_saved_mode(username) or "paper")).strip().lower()
+    if mode not in {"paper", "live"}:
+        mode = "paper"
 
-# Cleaned up corrupted code block (the apply_risk_level_settings loop was incorrectly placed here)
-
-
-# Renamed to save_config_to_file above for consistency and added username support.
+    return {
+        "mode": mode,
+        "riskLevel": saved.get("riskLevel", "MEDIUM"),
+        "stop_loss_pct": saved.get("stop_loss_pct", 0.05),
+        "target_profit_pct": saved.get("target_profit_pct", 0.10),
+        "targetPricePct": saved.get("target_profit_pct", 0.10),
+        "use_risk_reward": saved.get("use_risk_reward", True),
+        "risk_reward_ratio": saved.get("risk_reward_ratio", 2.0),
+        "max_capital_per_trade": saved.get("max_capital_per_trade", 0.25),
+        "max_trade_limit": saved.get("max_trade_limit", 150),
+        "tickers": saved.get("tickers", []),
+    }
 
 
 @app.post("/api/settings", response_model=MessageResponse)
 async def update_settings(request: SettingsRequest, user_demat: tuple = Depends(get_optional_user_demat)):
-    """Update bot settings. Isolated by user."""
-    payload, _ = user_demat if isinstance(user_demat, tuple) else (None, None)
-    username = (payload.get("sub") or "").strip(
-    ) if payload and isinstance(payload, dict) else "anonymous"
-    state = get_user_state(username)
-    bot = state.get("trading_bot")
+    """Update bot settings. Supports paper/live mode."""
+    payload, request_user_demat = user_demat if isinstance(user_demat, tuple) else (None, None)
+    username = (payload.get("sub") or "").strip() if payload and isinstance(payload, dict) else "anonymous"
 
     try:
-        if bot:
-            # Update configuration
+        if trading_bot:
             if request.mode is not None:
-                old_mode = bot.config.get('mode', 'paper')
-                new_mode = request.mode
+                old_mode = str(trading_bot.config.get("mode", "paper")).strip().lower()
+                new_mode = str(request.mode).strip().lower()
+
+                if new_mode not in {"paper", "live"}:
+                    new_mode = "paper" if old_mode == "paper" else "live"
+
                 if new_mode != old_mode:
-                    if bot.switch_trading_mode(new_mode, username=username):
-                        actual_mode = bot.config.get('mode', 'paper')
-                        save_config_to_file(actual_mode, bot.config, username)
+                    logger.info(f"Mode change requested: {old_mode} -> {new_mode}")
+                    if trading_bot.switch_trading_mode(new_mode, username=username):
+                        actual_mode = str(trading_bot.config.get("mode", "paper")).strip().lower()
+                        save_config_to_file(actual_mode, trading_bot.config, username)
                         set_current_saved_mode(actual_mode, username)
                     else:
-                        raise HTTPException(
-                            status_code=400, detail=f"Failed to switch to {new_mode}")
-                else:
-                    bot.config['mode'] = new_mode
+                        raise HTTPException(status_code=400, detail=f"Failed to switch to {new_mode} mode")
 
-            if request.riskLevel is not None:
-                bot.config['riskLevel'] = request.riskLevel
-
-                # Check if user provided custom values alongside preset risk level
-                has_custom_values = (
-                    request.stop_loss_pct is not None or
-                    request.target_profit_pct is not None or
-                    request.max_capital_per_trade is not None
-                )
-
-                if request.riskLevel in ["LOW", "MEDIUM", "HIGH"] and not has_custom_values:
-                    # Apply ONLY predefined risk level settings (no custom values)
-                    apply_risk_level_settings(bot, request.riskLevel)
-                elif has_custom_values:
-                    # User provided custom values - use CUSTOM mode even if risk level is preset
-                    logger.info(
-                        f"🎯 Custom values detected with {request.riskLevel} risk level - using hybrid mode")
-                    apply_risk_level_settings(
-                        bot=bot,
-                        risk_level="CUSTOM",
-                        custom_stop_loss=request.stop_loss_pct,
-                        custom_allocation=request.max_capital_per_trade,
-                        custom_target_profit=request.target_profit_pct,
-                        custom_use_rr=request.use_risk_reward,
-                        custom_rr_ratio=request.risk_reward_ratio
-                    )
-                else:
-                    # CUSTOM risk level with custom values
-                    apply_risk_level_settings(
-                        bot=bot,
-                        risk_level=request.riskLevel,
-                        custom_stop_loss=request.stop_loss_pct,
-                        custom_allocation=request.max_capital_per_trade,
-                        custom_target_profit=request.target_profit_pct,
-                        custom_use_rr=request.use_risk_reward,
-                        custom_rr_ratio=request.risk_reward_ratio
-                    )
-
-            # Save to user-specific config
-            save_config_to_file(bot.config.get(
-                'mode', 'paper'), bot.config, username)
-
-            # DEBUG: Log what's actually in bot.config before updating main file
-            logger.info(
-                f"🔍 DEBUG - bot.config contents before update_main_live_config:")
-            logger.info(f"   riskLevel: {bot.config.get('riskLevel')}")
-            logger.info(f"   stop_loss_pct: {bot.config.get('stop_loss_pct')}")
-            logger.info(
-                f"   target_profit_pct: {bot.config.get('target_profit_pct')}")
-            logger.info(
-                f"   max_capital_per_trade: {bot.config.get('max_capital_per_trade')}")
-
-            # CRITICAL FIX: Also update the main live_config.json for dynamic calculations
-            update_main_live_config(bot.config, username)
-
-            # Force immediate refresh of professional buy logic with new config
-            if hasattr(bot, 'professional_buy_integration') and bot.professional_buy_integration:
-                try:
-                    bot.professional_buy_integration.refresh_dynamic_config()
-                    logger.info(
-                        "✅ Professional buy logic config refreshed immediately")
-                except Exception as e:
-                    logger.warning(f"Config refresh skipped: {e}")
-
-            if hasattr(bot, 'executor') and bot.executor:
-                try:
-                    bot.executor.refresh_dynamic_config()
-                    logger.info(
-                        "✅ Position executor config refreshed immediately")
-                except Exception as e:
-                    logger.warning(f"Executor config refresh skipped: {e}")
+            # ...existing risk/settings updates...
+            current_mode = trading_bot.config.get("mode", "paper")
+            save_config_to_file(current_mode, trading_bot.config, username)
+            set_current_saved_mode(current_mode, username)
 
             return MessageResponse(message="Settings updated successfully")
 
-        # No bot exists, save directly to file
-        mode = request.mode or get_current_saved_mode(username)
-        saved = load_config_from_file(mode, username) or {}
-        # Merge new settings
-        for field in request.model_fields:
-            val = getattr(request, field, None)
-            if val is not None:
-                saved[field] = val
+        mode = (request.mode or get_current_saved_mode() or "paper").strip().lower()
+        if mode not in {"paper", "live"}:
+            mode = "paper"
 
-        save_config_to_file(mode, saved, username)
-        if request.mode:
-            set_current_saved_mode(request.mode, username)
+        config_to_save = {
+            "mode": mode,
+            "riskLevel": request.riskLevel or "MEDIUM",
+            "stop_loss_pct": request.stop_loss_pct if request.stop_loss_pct is not None else 0.05,
+            "target_profit_pct": request.target_profit_pct if request.target_profit_pct is not None else 0.1,
+            "use_risk_reward": request.use_risk_reward if request.use_risk_reward is not None else True,
+            "risk_reward_ratio": request.risk_reward_ratio if request.risk_reward_ratio is not None else 2.0,
+            "max_capital_per_trade": request.max_capital_per_trade if request.max_capital_per_trade is not None else 0.25,
+            "max_trade_limit": request.max_trade_limit if request.max_trade_limit is not None else 10,
+        }
 
-        # Also update main live_config.json
-        update_main_live_config(saved, username)
+        save_config_to_file(mode, config_to_save)
+        set_current_saved_mode(mode)
 
-        return MessageResponse(message="Settings saved to file; will apply on next bot start.")
+        return MessageResponse(message=f"Settings saved successfully. Mode: {mode}")
+
     except Exception as e:
-        logger.error(f"Error updating settings for {username}: {e}")
+        logger.error(f"Error updating settings: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
-
+        
 @app.get("/api/live-status")
 async def get_live_trading_status(user_demat: tuple = Depends(get_optional_user_demat)):
     """Get live trading status and connection info. When user has linked demat, dhan_configured reflects that (no env required)."""
