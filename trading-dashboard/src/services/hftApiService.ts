@@ -226,7 +226,7 @@ export const hftApiService = {
     async startBotWithSymbol(symbol: string): Promise<any> {
         try {
             // Use longer timeout for bot initialization
-            const response = await api.post('/bot/start-with-symbol', { symbol }, { timeout: 10000 }); // 10 seconds - should return quickly
+            const response = await api.post('/bot/start-with-symbol', { symbol }, { timeout: 60000 }); // 10 seconds - should return quickly
             return response.data;
         } catch (error) {
             console.error('Error starting bot with symbol:', error);

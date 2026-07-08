@@ -92,17 +92,18 @@ class DualPortfolioManager:
                         logger.info(
                             f"Found existing JSON data for {mode} mode")
                     else:
-                        initial_balance = 50000.0 if mode == "paper" else 0.0
+                        initial_balance = 100000.0 if mode == "paper" else 0.0
                         portfolio = Portfolio(
                             mode=mode,
                             user_id=self.user_id,
-                            cash=initial_balance,
-                            starting_balance=initial_balance,
+                            cash=100000.0,
+                            starting_balance=100000.0,
                             realized_pnl=0.0,
                             unrealized_pnl=0.0,
                             last_updated=datetime.now()
                         )
                         session.add(portfolio)
+                        session.flush()
                         logger.info(f"Created new {mode} portfolio")
 
                 # Initialize config files if they don't exist
@@ -186,7 +187,7 @@ class DualPortfolioManager:
             portfolio = session.query(Portfolio).filter_by(**self._portfolio_filter(mode)).first()
             if not portfolio:
                 logger.info(f"Creating new {mode} portfolio")
-                initial_balance = 50000.0 if mode == "paper" else 100000.0
+                initial_balance = 100000.0 if mode == "paper" else 100000.0
                 portfolio = Portfolio(
                     mode=mode,
                     user_id=self.user_id,
@@ -297,8 +298,8 @@ class DualPortfolioManager:
                 portfolio = Portfolio(
                     mode=self.current_mode,
                     user_id=self.user_id,
-                    cash=self.starting_balance if self.current_mode == "paper" else 100000.0,
-                    starting_balance=self.starting_balance,
+                    cash=100000.0,
+                    starting_balance=100000.0,
                     realized_pnl=0.0,
                     unrealized_pnl=0.0,
                     last_updated=datetime.now()
@@ -602,8 +603,8 @@ class DualPortfolioManager:
                     portfolio_id=portfolio.id).delete()
 
                 # Reset portfolio values
-                portfolio.cash = 50000.0
-                portfolio.starting_balance = 50000.0
+                portfolio.cash = 100000.0
+                portfolio.starting_balance = 100000.0
                 portfolio.realized_pnl = 0.0
                 portfolio.unrealized_pnl = 0.0
                 portfolio.last_updated = datetime.now()

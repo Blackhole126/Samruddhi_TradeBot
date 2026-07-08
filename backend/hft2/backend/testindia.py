@@ -73,6 +73,37 @@ def _safe_construct(cls, **kwargs):
         logger.warning(f"{cls.__name__}: dropping unsupported kwargs {dropped}")
     return cls(**filtered)
 
+def _normalize_ohlcv_columns(df):
+    """Normalize OHLCV column names from different data sources (Yahoo,
+    Alpha Vantage, MultiIndex from yf.download, etc.) into a standard
+    Open/High/Low/Close/Volume shape."""
+    import pandas as pd
+    if df is None or df.empty:
+        return df
+
+    # Flatten MultiIndex columns (e.g. yf.download() with ticker level)
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = [c[0] if isinstance(c, tuple) else c for c in df.columns]
+
+    rename_map = {}
+    for col in df.columns:
+        lower = str(col).strip().lower()
+        if lower in ("close", "4. close", "adj close", "adjclose"):
+            rename_map[col] = "Close"
+        elif lower in ("open", "1. open"):
+            rename_map[col] = "Open"
+        elif lower in ("high", "2. high"):
+            rename_map[col] = "High"
+        elif lower in ("low", "3. low"):
+            rename_map[col] = "Low"
+        elif lower in ("volume", "5. volume", "6. volume"):
+            rename_map[col] = "Volume"
+
+    if rename_map:
+        df = df.rename(columns=rename_map)
+
+    return df
+
 
 # Advanced ML and sentiment analysis imports
 try:
@@ -1088,11 +1119,11 @@ class VirtualPortfolio:
         data_dir = os.path.join(project_root, "data", "users", self.username)
         os.makedirs(data_dir, exist_ok=True)
 
-        # Live trading mode only - production ready
+        # Mode-aware file paths (paper and live must NOT share the same file)
         self.portfolio_file = os.path.join(
-            data_dir, "portfolio_india_live.json")
+            data_dir, f"portfolio_india_{self.mode}.json")
         self.trade_log_file = os.path.join(
-            data_dir, "trade_log_india_live.json")
+            data_dir, f"trade_log_india_{self.mode}.json")
 
         self.initialize_files()
         self.load_portfolio_data()
@@ -4731,7 +4762,15 @@ class Stock:
                 error_messages.append(error_msg)
                 error_count += 1
                 stock_info = {}
+            history = _normalize_ohlcv_columns(history)
+            if history is None or history.empty or "Close" not in history.columns:
+                logger.error(
+                    f"No usable 'Close' column for {ticker}. "
+                     f"Columns found: {list(history.columns) if history is not None else 'None'}"
+                )
+                raise ValueError(f"Could not find Close price data for {ticker}")
             current_price = float(history["Close"].iloc[-1])
+
             exchange_rates = self.fetch_exchange_rates()
             converted_prices = self.convert_price(
                 current_price, exchange_rates)
@@ -4898,7 +4937,12 @@ class Stock:
                     f"Using weighted sentiment score: {sentiment_score:.3f}")
             else:
                 # Fallback to regular aggregation
-                sentiment = sentiment_data["aggregated"]
+                if isinstance(sentiment_data, dict) and "aggregated" in sentiment_data:
+                    sentiment = sentiment_data["aggregated"]
+                else:
+                # Current sentiment fetcher returns a flat dict (positive/negative/neutral/...)
+                # rather than a nested {"aggregated": {...}} structure — use it directly.
+                    sentiment = sentiment_data
                 total_sentiment = sentiment["positive"] + \
                     sentiment["negative"] + sentiment["neutral"]
                 sentiment_score = sentiment["positive"] / \
@@ -5103,8 +5147,14 @@ class Stock:
             else:
                 combined_history = extended_history.reset_index(drop=True)
 
-                logger.info(
-                    f"Engineering features for ML pattern recognition...")
+                logger.info(f"Engineering features for ML pattern recognition...")
+                combined_history = _normalize_ohlcv_columns(combined_history)
+                if combined_history is None or combined_history.empty or "Close" not in combined_history.columns:
+                    logger.error(
+                        f"No usable 'Close' column in combined_history for {ticker}. "
+                        f"Columns found: {list(combined_history.columns) if combined_history is not None else 'None'}"
+                    )
+                    raise ValueError(f"Could not find Close price data in combined_history for {ticker}")
                 data = combined_history[['Close']].copy()
 
                 data['SMA_5'] = combined_history['Close'].rolling(
@@ -5375,6 +5425,7 @@ class Stock:
                 ]
                 X = data[features]
                 y = data['Close'].shift(-prediction_days)
+                
 
                 if len(X) < prediction_days + 1:
                     logger.error(

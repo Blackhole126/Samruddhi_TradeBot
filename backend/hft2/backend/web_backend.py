@@ -1114,7 +1114,7 @@ def _offline_bot_data(username: str = "anonymous"):
         cached = dict(state["_bot_data_cache"])
         cached["isRunning"] = False
         return cached
-
+    saved = {}
     try:
         # Note: get_current_saved_mode should ideally be per-user too
         mode = get_current_saved_mode(username)
@@ -1135,12 +1135,12 @@ def _offline_bot_data(username: str = "anonymous"):
             "maxTradeLimit": saved.get("max_trade_limit", 10),
         },
         "portfolio": {
-            "totalValue": 0,
-            "cash": 0,
+            "totalValue": saved.get("starting_balance", 100000),
+            "cash": saved.get("starting_balance", 100000),
             "investedValue": 0,
             "todayGain": 0,
             "holdings": {},
-            "startingBalance": 0,
+            "startingBalance": saved.get("starting_balance", 100000),
             "unrealizedPnL": 0,
             "realizedPnL": 0,
             "tradeLog": [],
@@ -3742,19 +3742,20 @@ class WebTradingBot:
             current_dir = os.path.dirname(os.path.abspath(__file__))
             project_root = os.path.dirname(current_dir)
             current_mode = self.config.get("mode", "paper")
-            # Use Indian-specific trade log files that the trading bot actually writes to
+            username = self.username or "anonymous"
+
+            # FIXED: Read from the user-specific data directory (matches VirtualPortfolio's write path)
             trade_log_file = os.path.join(
-                project_root, "data", f"trade_log_india_{current_mode}.json")
-            # Removed annoying log - file read is silent now
+                project_root, "data", "users", username, f"trade_log_india_{current_mode}.json")
+
             if os.path.exists(trade_log_file):
                 with open(trade_log_file, 'r') as f:
                     trades = json.load(f)
-
-                # Return the most recent trades (reversed order)
+                    
                 recent_trades = trades[-limit:] if trades else []
                 return list(reversed(recent_trades))
             else:
-                logger.debug("Trade log file not found")
+                logger.debug(f"Trade log file not found: {trade_log_file}")
                 return []
         except Exception as e:
             logger.error(f"Error getting recent trades: {e}")
@@ -4357,7 +4358,7 @@ def save_config_to_file(mode: str, config_data: dict, username: Optional[str] = 
     import json
 
     config_to_save = {
-        "mode": mode,
+        "mode": config_data.get("mode", "paper"),
         "riskLevel": config_data.get("riskLevel", "MEDIUM"),
         "targetPriceLevel": config_data.get("targetPriceLevel", "MEDIUM"),
         "stop_loss_pct": config_data.get("stop_loss_pct", 0.05),
@@ -4367,8 +4368,8 @@ def save_config_to_file(mode: str, config_data: dict, username: Optional[str] = 
         "max_capital_per_trade": config_data.get("max_capital_per_trade", 0.25),
         "max_trade_limit": config_data.get("max_trade_limit", 150),
         "tickers": config_data.get("tickers", []),
-        "created_at": datetime.now().isoformat()
-    }
+        "starting_balance": config_data.get("starting_balance", 100000),
+        }
 
     # Primary: persist to MongoDB (survives Render restarts)
     if username and username != "anonymous":
