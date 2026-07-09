@@ -20,6 +20,7 @@ import subprocess
 import platform
 import asyncio
 from contextlib import asynccontextmanager
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 
 # Import signal filtering layer
 from core.signal_filter import get_signal_filter, SignalQuality
@@ -39,7 +40,7 @@ logger.setLevel(logging.INFO)
 
 # CRITICAL FIX: Add global exception handler to catch unhandled exceptions
 # This will log any crashes that would otherwise silently kill the process
-
+ml_training_executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="ml_train")
 
 def _handle_unhandled_exception(exc_type, exc_value, exc_traceback):
     """Log unhandled exceptions to prevent silent crashes"""
@@ -7316,7 +7317,7 @@ async def start_bot(payload: dict = Depends(get_optional_user)):
                             "riskLevel", "MEDIUM")
                         apply_risk_level_settings(bot_instance, risk_level)
 
-                        await loop.run_in_executor(None, bot_instance.start)
+                        await loop.run_in_executor(ml_training_executor, bot_instance.start)
                         user_state["bot_running"] = True
 
                         # Start user's continuous loop
