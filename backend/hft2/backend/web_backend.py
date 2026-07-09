@@ -1136,12 +1136,12 @@ def _offline_bot_data(username: str = "anonymous"):
             "maxTradeLimit": saved.get("max_trade_limit", 10),
         },
         "portfolio": {
-            "totalValue": saved.get("starting_balance", 100000),
-            "cash": saved.get("starting_balance", 100000),
+            "totalValue": saved.get("starting_balance", 10000),
+            "cash": saved.get("starting_balance", 10000),
             "investedValue": 0,
             "todayGain": 0,
             "holdings": {},
-            "startingBalance": saved.get("starting_balance", 100000),
+            "startingBalance": saved.get("starting_balance", 10000),
             "unrealizedPnL": 0,
             "realizedPnL": 0,
             "tradeLog": [],
@@ -3703,7 +3703,7 @@ class WebTradingBot:
                 }
             else:
                 # Fallback to default values if no portfolio file exists
-                starting_balance = self.config.get('starting_balance', 0)
+                starting_balance = self.config.get('starting_balance', 10000)
                 return {
                     "total_value": starting_balance,
                     "cash": starting_balance,
@@ -3718,7 +3718,7 @@ class WebTradingBot:
                 }
         except Exception as e:
             logger.error(f"Error getting portfolio metrics: {e}")
-            starting_balance = self.config.get('starting_balance', 0)
+            starting_balance = self.config.get('starting_balance', 10000)
             return {
                 "total_value": starting_balance,
                 "cash": starting_balance,
@@ -6420,13 +6420,14 @@ async def get_bot_data(user=Depends(get_current_user_required)):
     username = user.get("sub")
     state = get_user_state(username)
     bot = state.get("trading_bot")
-    saved_mode = get_current_saved_mode(username)
+    effective_mode = (bot.config.get("mode") if bot else None) or get_current_saved_mode(username)
+    
     now = time.time()
 
     # ─── LIVE MODE: Always try to fetch real Dhan data ───────────────────────
-    logger.info(f"[DEBUG] saved_mode = {saved_mode}")
+    logger.info(f"[DEBUG] effective_mode  = {effective_mode}")
     logger.info(f"[DEBUG] current_saved_mode = {get_current_saved_mode(username)}")
-    if saved_mode == "live":
+    if effective_mode == "live":
         cached = state.get("_bot_data_cache")
         cache_age = now - state.get("_bot_data_cache_ts", 0)
 

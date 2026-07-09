@@ -1,0 +1,2 @@
+{"request_id": "train_rl_1780294277_1", "tool": "train_rl", "timestamp": "2026-06-01T11:41:17.645918", "request": {"symbol": "AAPL", "horizon": "intraday", "n_episodes": 10, "force_retrain": false}}
+{"request_id": "fetch_data_1780294724_2", "tool": "fetch_data", "timestamp": "2026-06-01T11:48:44.781467", "request": {"symbols": ["AAPL", "GOOGL", "TCS.NS"], "period": "1mo", "refresh": false, "include_features": false}}

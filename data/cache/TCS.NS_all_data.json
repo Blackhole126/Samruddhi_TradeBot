@@ -1,0 +1,1139 @@
+{
+  "symbol": "TCS.NS",
+  "fetch_time": "2026-06-01T11:49:03.148238",
+  "metadata": {
+    "symbol": "TCS.NS",
+    "fetch_timestamp": "2026-06-01T11:49:03.140485",
+    "period": "1mo",
+    "data_source": "yfinance",
+    "has_news": true
+  },
+  "price_history": [
+    {
+      "Open": 2440.804931640625,
+      "High": 2440.804931640625,
+      "Low": 2440.804931640625,
+      "Close": 2440.804931640625,
+      "Volume": 0,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-01 00:00:00+05:30"
+    },
+    {
+      "Open": 2460.6360738276094,
+      "High": 2464.8785979918853,
+      "Low": 2392.559133533261,
+      "Close": 2398.77490234375,
+      "Volume": 2632358,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-04 00:00:00+05:30"
+    },
+    {
+      "Open": 2397.4922011892513,
+      "High": 2427.485422911908,
+      "Low": 2379.9302759850466,
+      "Close": 2394.828369140625,
+      "Volume": 3385720,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-05 00:00:00+05:30"
+    },
+    {
+      "Open": 2409.2328690917466,
+      "High": 2437.9436740268407,
+      "Low": 2374.306536440952,
+      "Close": 2402.81982421875,
+      "Volume": 3147628,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-06 00:00:00+05:30"
+    },
+    {
+      "Open": 2405.582406456141,
+      "High": 2407.0623398832377,
+      "Low": 2365.9202387848723,
+      "Close": 2369.274658203125,
+      "Volume": 5829594,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-07 00:00:00+05:30"
+    },
+    {
+      "Open": 2365.920344937355,
+      "High": 2374.7999458983372,
+      "Low": 2343.326789953136,
+      "Close": 2362.368408203125,
+      "Volume": 3792199,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-08 00:00:00+05:30"
+    },
+    {
+      "Open": 2339.2814955090735,
+      "High": 2382.6928771212197,
+      "Low": 2339.2814955090735,
+      "Close": 2360.888427734375,
+      "Volume": 1975188,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-11 00:00:00+05:30"
+    },
+    {
+      "Open": 2343.2279819983573,
+      "High": 2343.2279819983573,
+      "Low": 2252.4587296430527,
+      "Close": 2269.52734375,
+      "Volume": 6347884,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-12 00:00:00+05:30"
+    },
+    {
+      "Open": 2275.1510766173806,
+      "High": 2278.308219875756,
+      "Low": 2238.6460506699204,
+      "Close": 2242.395263671875,
+      "Volume": 3171843,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-13 00:00:00+05:30"
+    },
+    {
+      "Open": 2234.6996825737074,
+      "High": 2234.6996825737074,
+      "Low": 2176.883514966109,
+      "Close": 2215.953857421875,
+      "Volume": 5633313,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-14 00:00:00+05:30"
+    },
+    {
+      "Open": 2221.873423006846,
+      "High": 2274.06564640704,
+      "Low": 2221.873423006846,
+      "Close": 2233.712890625,
+      "Volume": 3410637,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-15 00:00:00+05:30"
+    },
+    {
+      "Open": 2233.7129057172556,
+      "High": 2262.226194073794,
+      "Low": 2222.070714305826,
+      "Close": 2252.656005859375,
+      "Volume": 3773336,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-18 00:00:00+05:30"
+    },
+    {
+      "Open": 2269.2314317901273,
+      "High": 2345.793423403843,
+      "Low": 2266.3703232911885,
+      "Close": 2295.968994140625,
+      "Volume": 10394707,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-19 00:00:00+05:30"
+    },
+    {
+      "Open": 2292.8114703818346,
+      "High": 2310.669430390967,
+      "Low": 2286.793218866712,
+      "Close": 2296.2646484375,
+      "Volume": 2537422,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-20 00:00:00+05:30"
+    },
+    {
+      "Open": 2299.816595750975,
+      "High": 2304.650948701518,
+      "Low": 2283.0440165455843,
+      "Close": 2296.0673828125,
+      "Volume": 3299087,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-21 00:00:00+05:30"
+    },
+    {
+      "Open": 2299.9154856057353,
+      "High": 2308.696328282268,
+      "Low": 2277.223171267918,
+      "Close": 2286.300048828125,
+      "Volume": 2617262,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-22 00:00:00+05:30"
+    },
+    {
+      "Open": 2325.0,
+      "High": 2326.10009765625,
+      "Low": 2293.0,
+      "Close": 2308.199951171875,
+      "Volume": 3298364,
+      "Dividends": 31.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-25 00:00:00+05:30"
+    },
+    {
+      "Open": 2308.199951171875,
+      "High": 2327.89990234375,
+      "Low": 2272.39990234375,
+      "Close": 2276.199951171875,
+      "Volume": 3587597,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-26 00:00:00+05:30"
+    },
+    {
+      "Open": 2275.0,
+      "High": 2295.60009765625,
+      "Low": 2260.89990234375,
+      "Close": 2284.199951171875,
+      "Volume": 2653950,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-27 00:00:00+05:30"
+    },
+    {
+      "Open": 2284.199951171875,
+      "High": 2284.199951171875,
+      "Low": 2284.199951171875,
+      "Close": 2284.199951171875,
+      "Volume": 0,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-28 00:00:00+05:30"
+    },
+    {
+      "Open": 2291.0,
+      "High": 2334.0,
+      "Low": 2235.0,
+      "Close": 2258.89990234375,
+      "Volume": 16331582,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-29 00:00:00+05:30"
+    },
+    {
+      "Open": 2284.0,
+      "High": 2329.89990234375,
+      "Low": 2280.0,
+      "Close": 2329.5,
+      "Volume": 5732328,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-06-01 00:00:00+05:30"
+    }
+  ],
+  "info": {
+    "address1": "TCS House",
+    "address2": "Raveline Street Corner of Hazarimal Somani Marg Near Sterling Cinema, Fort",
+    "city": "Mumbai",
+    "zip": "400 001",
+    "country": "India",
+    "phone": "91 22 6778 9595",
+    "fax": "91 22 6778 9000",
+    "website": "https://www.tcs.com",
+    "industry": "Information Technology Services",
+    "industryKey": "information-technology-services",
+    "industryDisp": "Information Technology Services",
+    "sector": "Technology",
+    "sectorKey": "technology",
+    "sectorDisp": "Technology",
+    "longBusinessSummary": "Tata Consultancy Services Limited provides information technology (IT) and IT enabled services. It offers TCS ADD, a suite of AI powered life sciences platforms; TCS BaNCS, a financial services platform; TCS BFSI Platforms, a cloud-native, subscription-based as-a-service digital ecosystem for insurers and financial firms; TCS Chroma, a cloud-based AI-led hire-to-retire modular platform; TCS Customer Intelligence & Insights, an AI-powered, real-time customer data analytics solution; TCS ERP on Cloud, SAP transformation with AI-powered smart solutions; ignio, a cognitive automation software product; TCS iON, a learning ecosystem; and TCS HOBS, a cloud-native, catalog-centric platform with composable architecture and insights-led personalization capabilities. It also offers TCS Intelligent Urban Exchange for enterprises and smart cities; TCS OmniStore, a retail commerce platform; TCS Optumera, a strategic intelligence platform; TCS Tap, a platform for intelligent procurement; Quartz, a distributed ledger technology; TCS TwinX, a risk-free experimentation platform; TCS MasterCraft, an AI-driven cognitive automation product; Jile, an enterprise agile planning and delivery tool; TCS DigiBOLT, an end-to-end, organization-wide enterprise platform; and TCS AI WisdomNext, an enterprise grade GenAI platform. In addition, the company provides AI, data and analytics, cloud, cognitive business, consulting, cybersecurity, enterprise solutions, industrial autonomy and engineering, network solutions and services, TCS interactive, and sustainability services. It serves banking; capital markets; consumer packaged goods and distribution; communications, media, and information services; education; energy, resources, and utilities; healthcare; high tech; insurance; life sciences; manufacturing; public services; retail; and travel and logistics industries. The company was founded in 1968 and is based in Mumbai, India. The company operates as a subsidiary of Tata Sons Private Limited.",
+    "fullTimeEmployees": 584519,
+    "companyOfficers": [
+      {
+        "maxAge": 1,
+        "name": "Mr. K.  Krithivasan B.E, M.Tech.",
+        "age": 61,
+        "title": "MD, CEO & Non-Independent Executive Director",
+        "yearBorn": 1964,
+        "fiscalYear": 2026,
+        "totalPay": 281130000,
+        "exercisedValue": 0,
+        "unexercisedValue": 0
+      },
+      {
+        "maxAge": 1,
+        "name": "Ms. Aarthi  Subramanian",
+        "age": 58,
+        "title": "President, COO & Non-Independent Executive Director",
+        "yearBorn": 1967,
+        "fiscalYear": 2026,
+        "totalPay": 184823190,
+        "exercisedValue": 0,
+        "unexercisedValue": 0
+      },
+      {
+        "maxAge": 1,
+        "name": "Mr. Samir  Seksaria",
+        "title": "Chief Financial Officer",
+        "fiscalYear": 2026,
+        "exercisedValue": 0,
+        "unexercisedValue": 0
+      },
+      {
+        "maxAge": 1,
+        "name": "Dr. Harrick  Vin",
+        "title": "Chief Technology Officer",
+        "fiscalYear": 2026,
+        "exercisedValue": 0,
+        "unexercisedValue": 0
+      },
+      {
+        "maxAge": 1,
+        "name": "Janardhan  Santhanam",
+        "title": "Chief Information Officer",
+        "fiscalYear": 2026,
+        "exercisedValue": 0,
+        "unexercisedValue": 0
+      },
+      {
+        "maxAge": 1,
+        "name": "Mr. Madhav  Anchan",
+        "title": "General Counsel Legal",
+        "fiscalYear": 2026,
+        "exercisedValue": 0,
+        "unexercisedValue": 0
+      },
+      {
+        "maxAge": 1,
+        "name": "Mr. Yashaswin Narendra Sheth",
+        "title": "Company Secretary & Compliance Officer",
+        "fiscalYear": 2026,
+        "exercisedValue": 0,
+        "unexercisedValue": 0
+      },
+      {
+        "maxAge": 1,
+        "name": "Mr. Kinshuk  Gupta",
+        "title": "Chief Communications Officer",
+        "fiscalYear": 2026,
+        "exercisedValue": 0,
+        "unexercisedValue": 0
+      },
+      {
+        "maxAge": 1,
+        "name": "Abhinav  Kumar",
+        "title": "Chief Marketing Officer",
+        "fiscalYear": 2026,
+        "exercisedValue": 0,
+        "unexercisedValue": 0
+      },
+      {
+        "maxAge": 1,
+        "name": "Mr. Sudeep  Kunnumal",
+        "title": "Chief Human Resources Officer",
+        "fiscalYear": 2026,
+        "exercisedValue": 0,
+        "unexercisedValue": 0
+      }
+    ],
+    "auditRisk": 2,
+    "boardRisk": 4,
+    "compensationRisk": 1,
+    "shareHolderRightsRisk": 8,
+    "overallRisk": 2,
+    "governanceEpochDate": 1777593600,
+    "compensationAsOfEpochDate": 1798675200,
+    "irWebsite": "http://www.tcs.com/investors/Pages/default.aspx",
+    "executiveTeam": [],
+    "maxAge": 86400,
+    "priceHint": 2,
+    "previousClose": 2258.9,
+    "open": 2284.0,
+    "dayLow": 2280.0,
+    "dayHigh": 2329.9,
+    "regularMarketPreviousClose": 2258.9,
+    "regularMarketOpen": 2284.0,
+    "regularMarketDayLow": 2280.0,
+    "regularMarketDayHigh": 2329.9,
+    "dividendRate": 124.0,
+    "dividendYield": 5.49,
+    "exDividendDate": 1779667200,
+    "payoutRatio": 0.4632,
+    "fiveYearAvgDividendYield": 1.49,
+    "beta": 0.289,
+    "trailingPE": 17.129936,
+    "forwardPE": 14.0814085,
+    "volume": 5732328,
+    "regularMarketVolume": 5732328,
+    "averageVolume": 4265512,
+    "averageVolume10days": 5388145,
+    "averageDailyVolume10Day": 5388145,
+    "bid": 2327.5,
+    "ask": 2329.6,
+    "bidSize": 0,
+    "askSize": 0,
+    "marketCap": 8428334874624,
+    "nonDilutedMarketCap": 8172897894410,
+    "fiftyTwoWeekLow": 2206.4,
+    "fiftyTwoWeekHigh": 3538.0,
+    "allTimeHigh": 4592.25,
+    "allTimeLow": 32.475,
+    "priceToSalesTrailing12Months": 3.1564314,
+    "fiftyDayAverage": 2416.422,
+    "twoHundredDayAverage": 2865.5774,
+    "trailingAnnualDividendRate": 64.0,
+    "trailingAnnualDividendYield": 0.028332375,
+    "currency": "INR",
+    "tradeable": false,
+    "enterpriseValue": 7888567795712,
+    "profitMargins": 0.18429,
+    "floatShares": 1019685605,
+    "sharesOutstanding": 3618087518,
+    "heldPercentInsiders": 0.71795,
+    "heldPercentInstitutions": 0.17912,
+    "impliedSharesOutstanding": 3618087518,
+    "bookValue": 313.727,
+    "priceToBook": 7.425246,
+    "lastFiscalYearEnd": 1774915200,
+    "nextFiscalYearEnd": 1806451200,
+    "mostRecentQuarter": 1774915200,
+    "earningsQuarterlyGrowth": 0.122,
+    "netIncomeToCommon": 492099993600,
+    "trailingEps": 135.99,
+    "forwardEps": 165.4309,
+    "pegRatio": 2.45,
+    "lastSplitFactor": "2:1",
+    "lastSplitDate": 1527724800,
+    "enterpriseToRevenue": 2.954,
+    "enterpriseToEbitda": 11.163,
+    "52WeekChange": -0.3452084,
+    "SandP52WeekChange": 0.27697718,
+    "lastDividendValue": 31.0,
+    "lastDividendDate": 1779667200,
+    "quoteType": "EQUITY",
+    "currentPrice": 2329.5,
+    "targetHighPrice": 3900.0,
+    "targetLowPrice": 1775.0,
+    "targetMeanPrice": 2939.5813,
+    "targetMedianPrice": 2950.0,
+    "recommendationMean": 2.11628,
+    "recommendationKey": "buy",
+    "numberOfAnalystOpinions": 43,
+    "totalCash": 410799996928,
+    "totalCashPerShare": 113.541,
+    "ebitda": 706640019456,
+    "totalDebt": 112829997056,
+    "quickRatio": 1.974,
+    "currentRatio": 2.228,
+    "totalRevenue": 2670210056192,
+    "debtToEquity": 10.389,
+    "revenuePerShare": 738.017,
+    "returnOnAssets": 0.24436001,
+    "returnOnEquity": 0.48395002,
+    "grossProfits": 1076279967744,
+    "freeCashflow": 370597494784,
+    "operatingCashflow": 520939995136,
+    "earningsGrowth": 0.122,
+    "revenueGrowth": 0.096,
+    "grossMargins": 0.40307,
+    "ebitdaMargins": 0.26464,
+    "operatingMargins": 0.25288,
+    "financialCurrency": "INR",
+    "symbol": "TCS.NS",
+    "language": "en-US",
+    "region": "US",
+    "typeDisp": "Equity",
+    "quoteSourceName": "Free Realtime Quote",
+    "triggerable": true,
+    "customPriceAlertConfidence": "HIGH",
+    "hasPrePostMarketData": false,
+    "firstTradeDateMilliseconds": 1029123900000,
+    "regularMarketChange": 70.6001,
+    "regularMarketDayRange": "2280.0 - 2329.9",
+    "fullExchangeName": "NSE",
+    "averageDailyVolume3Month": 4265512,
+    "fiftyTwoWeekLowChange": 123.1001,
+    "fiftyTwoWeekLowChangePercent": 0.055792287,
+    "fiftyTwoWeekRange": "2206.4 - 3538.0",
+    "fiftyTwoWeekHighChange": -1208.5,
+    "fiftyTwoWeekHighChangePercent": -0.34157717,
+    "fiftyTwoWeekChangePercent": -34.52084,
+    "earningsTimestamp": 1775728800,
+    "earningsTimestampStart": 1783591200,
+    "earningsTimestampEnd": 1783591200,
+    "earningsCallTimestampStart": 1775741400,
+    "earningsCallTimestampEnd": 1775741400,
+    "isEarningsDateEstimate": true,
+    "epsTrailingTwelveMonths": 135.99,
+    "epsForward": 165.4309,
+    "epsCurrentYear": 156.14716,
+    "priceEpsCurrentYear": 14.918619,
+    "fiftyDayAverageChange": -86.92212,
+    "fiftyDayAverageChangePercent": -0.035971414,
+    "twoHundredDayAverageChange": -536.0774,
+    "twoHundredDayAverageChangePercent": -0.18707483,
+    "sourceInterval": 15,
+    "exchangeDataDelayedBy": 15,
+    "averageAnalystRating": "2.1 - Buy",
+    "cryptoTradeable": false,
+    "longName": "Tata Consultancy Services Limited",
+    "marketState": "REGULAR",
+    "corporateActions": [],
+    "regularMarketTime": 1780294740,
+    "exchange": "NSI",
+    "messageBoardId": "finmb_6411769",
+    "exchangeTimezoneName": "Asia/Kolkata",
+    "exchangeTimezoneShortName": "IST",
+    "gmtOffSetMilliseconds": 19800000,
+    "market": "in_market",
+    "esgPopulated": false,
+    "regularMarketChangePercent": 3.1250043,
+    "regularMarketPrice": 2329.5,
+    "shortName": "TATA CONSULTANCY SERV LT",
+    "trailingPegRatio": 2.4489
+  },
+  "key_metrics": {
+    "marketCap": 8428334874624,
+    "enterpriseValue": 7888567795712,
+    "priceToBook": 7.425246,
+    "priceToSalesTrailing12Months": 3.1564314,
+    "profitMargins": 0.18429,
+    "operatingMargins": 0.25288,
+    "returnOnAssets": 0.24436001,
+    "returnOnEquity": 0.48395002,
+    "totalCash": 410799996928,
+    "totalDebt": 112829997056,
+    "debtToEquity": 10.389,
+    "currentRatio": 2.228,
+    "quickRatio": 1.974,
+    "trailingEps": 135.99,
+    "forwardEps": 165.4309,
+    "trailingPE": 17.129936,
+    "forwardPE": 14.0814085,
+    "pegRatio": 2.45,
+    "dividendRate": 124.0,
+    "dividendYield": 5.49,
+    "payoutRatio": 0.4632,
+    "fiveYearAvgDividendYield": 1.49,
+    "revenueGrowth": 0.096,
+    "earningsGrowth": 0.122,
+    "earningsQuarterlyGrowth": 0.122,
+    "beta": 0.289,
+    "fiftyTwoWeekLow": 2206.4,
+    "fiftyTwoWeekHigh": 3538.0,
+    "fiftyDayAverage": 2416.422,
+    "targetHighPrice": 3900.0,
+    "targetLowPrice": 1775.0,
+    "targetMeanPrice": 2939.5813,
+    "targetMedianPrice": 2950.0,
+    "recommendationMean": 2.11628,
+    "recommendationKey": "buy",
+    "numberOfAnalystOpinions": 43,
+    "sector": "Technology",
+    "industry": "Information Technology Services",
+    "country": "India",
+    "fullTimeEmployees": 584519
+  },
+  "news": [
+    {
+      "id": "b07080bd-5bae-3318-8e98-7a0a6d983c88",
+      "content": {
+        "id": "b07080bd-5bae-3318-8e98-7a0a6d983c88",
+        "contentType": "STORY",
+        "title": "TCS and Mistral agree partnership for advanced AI model deployment",
+        "description": "",
+        "summary": "The collaboration focuses on developing custom AI models that use enterprise data to support automation, analytics and business decisions.",
+        "pubDate": "2026-05-29T07:31:51Z",
+        "displayTime": "2026-05-29T07:31:51Z",
+        "isHosted": true,
+        "bypassModal": false,
+        "previewUrl": null,
+        "thumbnail": {
+          "originalUrl": "https://media.zenfs.com/en/verdict_626/bd3f41b78e9b003bf72457c0838e42ac",
+          "originalWidth": 1440,
+          "originalHeight": 810,
+          "caption": "TCS to offer Mistral Forge AI platform to enterprises worldwide",
+          "resolutions": [
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/T6RTnBAFX5KDr95J57y5xg--~B/aD04MTA7dz0xNDQwO2FwcGlkPXl0YWNoeW9u/https://media.zenfs.com/en/verdict_626/bd3f41b78e9b003bf72457c0838e42ac",
+              "width": 1440,
+              "height": 810,
+              "tag": "original"
+            },
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/wTE50fiPvKh76qSNFo_t1Q--~B/Zmk9c3RyaW07aD0xMjg7dz0xNzA7YXBwaWQ9eXRhY2h5b24-/https://media.zenfs.com/en/verdict_626/bd3f41b78e9b003bf72457c0838e42ac",
+              "width": 170,
+              "height": 128,
+              "tag": "170x128"
+            }
+          ]
+        },
+        "provider": {
+          "displayName": "Verdict",
+          "url": "https://www.globaldata.com/",
+          "sourceId": "verdict_626"
+        },
+        "canonicalUrl": {
+          "url": "https://www.verdict.co.uk/tcs-mistral-ai-model-deployment/",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "clickThroughUrl": {
+          "url": "https://finance.yahoo.com/sectors/technology/articles/tcs-mistral-agree-partnership-advanced-073151137.html",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "metadata": {
+          "editorsPick": false
+        },
+        "finance": {
+          "premiumFinance": {
+            "isPremiumNews": false,
+            "isPremiumFreeNews": false
+          }
+        },
+        "storyline": null
+      }
+    },
+    {
+      "id": "db0616af-4b88-3e89-9db2-d30d06658084",
+      "content": {
+        "id": "db0616af-4b88-3e89-9db2-d30d06658084",
+        "contentType": "STORY",
+        "title": "Is Amazon.com (AMZN) the Best Strong Buy Stock to Buy and Hold for the Next 5 Years?",
+        "description": "",
+        "summary": "Amazon.com, Inc. (NASDAQ:AMZN) is one of the 12 Strong Buy Stocks to Buy and Hold for the Next 5 Years. On May 21, 2026, QAD Redzone announced an expanded strategic collaboration with Amazon Web Services, a unit of Amazon.com, Inc. (NASDAQ:AMZN), and Tata Consultancy Services. The companies said the collaboration is aimed at helping manufacturers [\u2026]",
+        "pubDate": "2026-05-29T00:51:44Z",
+        "displayTime": "2026-05-29T00:51:44Z",
+        "isHosted": true,
+        "bypassModal": false,
+        "previewUrl": null,
+        "thumbnail": {
+          "originalUrl": "https://media.zenfs.com/en/insidermonkey.com/e3a58b6f338e589ccf256d87d10d0922",
+          "originalWidth": 940,
+          "originalHeight": 629,
+          "caption": "Is Amazon.com (AMZN) the Best Strong Buy Stock to Buy and Hold for the Next 5 Years?",
+          "resolutions": [
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/f_FiEM1y8uXX6Ac5pkjs4g--~B/aD02Mjk7dz05NDA7YXBwaWQ9eXRhY2h5b24-/https://media.zenfs.com/en/insidermonkey.com/e3a58b6f338e589ccf256d87d10d0922",
+              "width": 940,
+              "height": 629,
+              "tag": "original"
+            },
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/CLfQMnoMRLUBsaHsU18mig--~B/Zmk9c3RyaW07aD0xMjg7dz0xNzA7YXBwaWQ9eXRhY2h5b24-/https://media.zenfs.com/en/insidermonkey.com/e3a58b6f338e589ccf256d87d10d0922",
+              "width": 170,
+              "height": 128,
+              "tag": "170x128"
+            }
+          ]
+        },
+        "provider": {
+          "displayName": "Insider Monkey",
+          "url": "http://www.insidermonkey.com",
+          "sourceId": "insidermonkey.com"
+        },
+        "canonicalUrl": {
+          "url": "https://finance.yahoo.com/markets/stocks/articles/amazon-com-amzn-best-strong-005144570.html",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "clickThroughUrl": {
+          "url": "https://finance.yahoo.com/markets/stocks/articles/amazon-com-amzn-best-strong-005144570.html",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "metadata": {
+          "editorsPick": false
+        },
+        "finance": {
+          "premiumFinance": {
+            "isPremiumNews": false,
+            "isPremiumFreeNews": false
+          }
+        },
+        "storyline": null
+      }
+    },
+    {
+      "id": "a2e61c16-f69f-3b68-af96-fef91c0e7a1a",
+      "content": {
+        "id": "a2e61c16-f69f-3b68-af96-fef91c0e7a1a",
+        "contentType": "STORY",
+        "title": "India Tests Banking, Aadhaar Systems Against Anthropic's Mythos AI Threats",
+        "description": "",
+        "summary": "Infosys, TCS, and CERT-In are assessing vulnerabilities across financial software and government digital infrastructure.",
+        "pubDate": "2026-05-27T17:44:14Z",
+        "displayTime": "2026-05-27T17:44:14Z",
+        "isHosted": true,
+        "bypassModal": false,
+        "previewUrl": null,
+        "thumbnail": null,
+        "provider": {
+          "displayName": "GuruFocus.com",
+          "url": "http://www.gurufocus.com/",
+          "sourceId": "us.finance.gurufocus"
+        },
+        "canonicalUrl": {
+          "url": "https://finance.yahoo.com/sectors/technology/articles/india-tests-banking-aadhaar-systems-174414422.html",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "clickThroughUrl": {
+          "url": "https://finance.yahoo.com/sectors/technology/articles/india-tests-banking-aadhaar-systems-174414422.html",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "metadata": {
+          "editorsPick": false
+        },
+        "finance": {
+          "premiumFinance": {
+            "isPremiumNews": false,
+            "isPremiumFreeNews": false
+          }
+        },
+        "storyline": null
+      }
+    },
+    {
+      "id": "1632a117-2a2b-35a9-9754-16b4cc79d482",
+      "content": {
+        "id": "1632a117-2a2b-35a9-9754-16b4cc79d482",
+        "contentType": "STORY",
+        "title": "TCS launches SovereignSecure Cloud in Europe for public sector",
+        "description": "",
+        "summary": "The service targets rising EU demand for data sovereignty, regulatory compliance and cloud security in regulated sectors.",
+        "pubDate": "2026-05-27T09:35:18Z",
+        "displayTime": "2026-05-27T09:35:18Z",
+        "isHosted": true,
+        "bypassModal": false,
+        "previewUrl": null,
+        "thumbnail": {
+          "originalUrl": "https://media.zenfs.com/en/verdict_626/826c2e8ff3ec6e2bdffc276f909dda05",
+          "originalWidth": 1440,
+          "originalHeight": 810,
+          "caption": "TCS expands cloud portfolio in Europe with SovereignSecure Cloud",
+          "resolutions": [
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/5MmT7nT7inEcWtU9xiNzdw--~B/aD04MTA7dz0xNDQwO2FwcGlkPXl0YWNoeW9u/https://media.zenfs.com/en/verdict_626/826c2e8ff3ec6e2bdffc276f909dda05",
+              "width": 1440,
+              "height": 810,
+              "tag": "original"
+            },
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/GAmE.278KmpPpLnmDgklFw--~B/Zmk9c3RyaW07aD0xMjg7dz0xNzA7YXBwaWQ9eXRhY2h5b24-/https://media.zenfs.com/en/verdict_626/826c2e8ff3ec6e2bdffc276f909dda05",
+              "width": 170,
+              "height": 128,
+              "tag": "170x128"
+            }
+          ]
+        },
+        "provider": {
+          "displayName": "Verdict",
+          "url": "https://www.globaldata.com/",
+          "sourceId": "verdict_626"
+        },
+        "canonicalUrl": {
+          "url": "https://www.verdict.co.uk/tcs-sovereignsecure-cloud-europe/",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "clickThroughUrl": {
+          "url": "https://finance.yahoo.com/sectors/technology/articles/tcs-launches-sovereignsecure-cloud-europe-093518682.html",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "metadata": {
+          "editorsPick": false
+        },
+        "finance": {
+          "premiumFinance": {
+            "isPremiumNews": false,
+            "isPremiumFreeNews": false
+          }
+        },
+        "storyline": null
+      }
+    },
+    {
+      "id": "74506265-3e9c-3fab-9ce5-85290cee5954",
+      "content": {
+        "id": "74506265-3e9c-3fab-9ce5-85290cee5954",
+        "contentType": "STORY",
+        "title": "Rezolve AI TCS Alliance Puts Growth Ambitions Against Valuation Concerns",
+        "description": "",
+        "summary": "Rezolve AI and Tata Consultancy Services have entered a global partnership to roll out Rezolve\u2019s AI powered commerce platform to enterprises worldwide. The collaboration aims to use TCS\u2019s client base and delivery network to expand Rezolve AI\u2019s market reach and adoption. Rezolve AI (NasdaqGM:RZLV) is drawing fresh attention after announcing this new partnership with TCS, which comes as the stock trades at $2.55. The share price performance is mixed, with the stock up 6.2% over the past week,...",
+        "pubDate": "2026-05-17T23:09:23Z",
+        "displayTime": "2026-05-17T23:09:23Z",
+        "isHosted": true,
+        "bypassModal": false,
+        "previewUrl": null,
+        "thumbnail": {
+          "originalUrl": "https://media.zenfs.com/en/simply_wall_st__316/41bdd0c670f621394929d5266c5d6c72",
+          "originalWidth": 1194,
+          "originalHeight": 432,
+          "caption": "",
+          "resolutions": [
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/3wFOxca.gMo3EgB9BjBM9g--~B/aD00MzI7dz0xMTk0O2FwcGlkPXl0YWNoeW9u/https://media.zenfs.com/en/simply_wall_st__316/41bdd0c670f621394929d5266c5d6c72",
+              "width": 1194,
+              "height": 432,
+              "tag": "original"
+            },
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/vD4pRO4kEaxH8LXMGMHNtw--~B/Zmk9c3RyaW07aD0xMjg7dz0xNzA7YXBwaWQ9eXRhY2h5b24-/https://media.zenfs.com/en/simply_wall_st__316/41bdd0c670f621394929d5266c5d6c72",
+              "width": 170,
+              "height": 128,
+              "tag": "170x128"
+            }
+          ]
+        },
+        "provider": {
+          "displayName": "Simply Wall St.",
+          "url": "https://simplywall.st/",
+          "sourceId": "simply_wall_st__316"
+        },
+        "canonicalUrl": {
+          "url": "https://finance.yahoo.com/markets/stocks/articles/rezolve-ai-tcs-alliance-puts-230923810.html",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "clickThroughUrl": {
+          "url": "https://finance.yahoo.com/markets/stocks/articles/rezolve-ai-tcs-alliance-puts-230923810.html",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "metadata": {
+          "editorsPick": false
+        },
+        "finance": {
+          "premiumFinance": {
+            "isPremiumNews": false,
+            "isPremiumFreeNews": false
+          }
+        },
+        "storyline": null
+      }
+    },
+    {
+      "id": "8f21dba7-8773-3b86-9382-a2d01e2ecc62",
+      "content": {
+        "id": "8f21dba7-8773-3b86-9382-a2d01e2ecc62",
+        "contentType": "STORY",
+        "title": "Explainer-Why India\u2019s Tata Sons is under pressure to list as trust divisions emerge",
+        "description": "",
+        "summary": "By Jayshree P Upadhyay and Gopika Gopakumar MUMBAI, May 16 (Reuters) - India's Tata Sons, the umbrella organisation for 31 companies including TCS, Tata Motors and Tata Steel, is facing pressure to go",
+        "pubDate": "2026-05-16T04:47:11Z",
+        "displayTime": "2026-05-16T04:47:11Z",
+        "isHosted": true,
+        "bypassModal": false,
+        "previewUrl": null,
+        "thumbnail": {
+          "originalUrl": "https://media.zenfs.com/en/reuters.com/77e52376ac1da8396f46407172de159c",
+          "originalWidth": 800,
+          "originalHeight": 549,
+          "caption": "Natarajan Chandrasekaran, Chairperson Tata Sons, attends the listing ceremony of Tata Capital Limited at the National Stock Exchange (NSE) in Mumbai, India, October 13, 2025. REUTERS/Francis Mascarenhas",
+          "resolutions": [
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/WO0j1nacqvEusww9j.sYOg--~B/aD01NDk7dz04MDA7YXBwaWQ9eXRhY2h5b24-/https://media.zenfs.com/en/reuters.com/77e52376ac1da8396f46407172de159c",
+              "width": 800,
+              "height": 549,
+              "tag": "original"
+            },
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/mgsj2th7dAWVhooq_RGD_A--~B/Zmk9c3RyaW07aD0xMjg7dz0xNzA7YXBwaWQ9eXRhY2h5b24-/https://media.zenfs.com/en/reuters.com/77e52376ac1da8396f46407172de159c",
+              "width": 170,
+              "height": 128,
+              "tag": "170x128"
+            }
+          ]
+        },
+        "provider": {
+          "displayName": "Reuters",
+          "url": "https://www.reuters.com/",
+          "sourceId": "reuters.com"
+        },
+        "canonicalUrl": {
+          "url": "https://sg.finance.yahoo.com/news/explainer-why-indias-tata-sons-073258579.html",
+          "site": "finance",
+          "region": "SG",
+          "lang": "en-SG"
+        },
+        "clickThroughUrl": {
+          "url": "https://finance.yahoo.com/news/explainer-why-indias-tata-sons-073258579.html",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "metadata": {
+          "editorsPick": false
+        },
+        "finance": {
+          "premiumFinance": {
+            "isPremiumNews": false,
+            "isPremiumFreeNews": false
+          }
+        },
+        "storyline": null
+      }
+    },
+    {
+      "id": "1a5fd6a1-95a0-37d3-9304-6a98e216a088",
+      "content": {
+        "id": "1a5fd6a1-95a0-37d3-9304-6a98e216a088",
+        "contentType": "STORY",
+        "title": "TCS partners with Rezolve Ai to scale agentic AI commerce for retailers",
+        "description": "",
+        "summary": "The deal marks the Indian IT service provider\u2019s entry into the agentic AI commerce market.",
+        "pubDate": "2026-05-13T09:38:41Z",
+        "displayTime": "2026-05-13T09:38:41Z",
+        "isHosted": true,
+        "bypassModal": false,
+        "previewUrl": null,
+        "thumbnail": {
+          "originalUrl": "https://media.zenfs.com/en/retail_insight_network_724/63877583e6ee871b8d9c5dd5c5cfd0fa",
+          "originalWidth": 1440,
+          "originalHeight": 810,
+          "caption": "Retailers will also be able to use the agentic commerce offering through TCS\u2019 global network of Pace Port innovation centres. Credit: ACHPF / Shutterstock.com.",
+          "resolutions": [
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/sJwFm6XDDZDwB6SGnWAoaQ--~B/aD04MTA7dz0xNDQwO2FwcGlkPXl0YWNoeW9u/https://media.zenfs.com/en/retail_insight_network_724/63877583e6ee871b8d9c5dd5c5cfd0fa",
+              "width": 1440,
+              "height": 810,
+              "tag": "original"
+            },
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/0gWP_zJQHV1pimDODKrE5A--~B/Zmk9c3RyaW07aD0xMjg7dz0xNzA7YXBwaWQ9eXRhY2h5b24-/https://media.zenfs.com/en/retail_insight_network_724/63877583e6ee871b8d9c5dd5c5cfd0fa",
+              "width": 170,
+              "height": 128,
+              "tag": "170x128"
+            }
+          ]
+        },
+        "provider": {
+          "displayName": "Retail Insight Network",
+          "url": "https://www.globaldata.com/",
+          "sourceId": "retail_insight_network_724"
+        },
+        "canonicalUrl": {
+          "url": "https://www.retail-insight-network.com/news/tcs-partners-rezolve-ai-agentic-ai-commerce/",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "clickThroughUrl": {
+          "url": "https://finance.yahoo.com/news/tcs-partners-rezolve-ai-scale-093841349.html",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "metadata": {
+          "editorsPick": false
+        },
+        "finance": {
+          "premiumFinance": {
+            "isPremiumNews": false,
+            "isPremiumFreeNews": false
+          }
+        },
+        "storyline": null
+      }
+    },
+    {
+      "id": "57cc8364-37a1-34f7-9c93-0ffce8fdb8d8",
+      "content": {
+        "id": "57cc8364-37a1-34f7-9c93-0ffce8fdb8d8",
+        "contentType": "STORY",
+        "title": "India's IT shares near three\u2011year low as OpenAI move revives AI fears",
+        "description": "",
+        "summary": "India's IT shares fell to a three-year low on Tuesday as investor jitters around the threat posed by artificial intelligence to flagship IT firms flared \u200cup again, after OpenAI announced a new AI venture.  The Nifty IT index fell 3.6% to \u200cits lowest since May 2023, with Tata Consultancy Services, Infosys, HCL Technologies and Wipro falling between 2.5% and 4%.  Analysts at HSBC \u200bsaid in a Tuesday note that India's top-tier IT firms largely failed to meet street expectations for earnings in March quarter as well as in their outlooks for the new financial year, adding that strong spending globally on AI could be \"crowding out\" demand for traditional IT services.",
+        "pubDate": "2026-05-12T05:41:52Z",
+        "displayTime": "2026-05-12T05:41:52Z",
+        "isHosted": true,
+        "bypassModal": false,
+        "previewUrl": null,
+        "thumbnail": {
+          "originalUrl": "https://media.zenfs.com/en/reuters-finance.com/5e4281e0a38dc414240af6c2b5831e8a",
+          "originalWidth": 800,
+          "originalHeight": 533,
+          "caption": "FILE PHOTO: People walk outside the National Stock Exchange (NSE) in Mumbai",
+          "resolutions": [
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/78sn4S9noJWBegEEWVqauA--~B/aD01MzM7dz04MDA7YXBwaWQ9eXRhY2h5b24-/https://media.zenfs.com/en/reuters-finance.com/5e4281e0a38dc414240af6c2b5831e8a",
+              "width": 800,
+              "height": 533,
+              "tag": "original"
+            },
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/L9mMoWcmFh42IL.ck8pyCA--~B/Zmk9c3RyaW07aD0xMjg7dz0xNzA7YXBwaWQ9eXRhY2h5b24-/https://media.zenfs.com/en/reuters-finance.com/5e4281e0a38dc414240af6c2b5831e8a",
+              "width": 170,
+              "height": 128,
+              "tag": "170x128"
+            }
+          ]
+        },
+        "provider": {
+          "displayName": "Reuters",
+          "url": "http://www.reuters.com/",
+          "sourceId": "reuters-finance.com"
+        },
+        "canonicalUrl": {
+          "url": "https://finance.yahoo.com/markets/stocks/articles/indias-index-falls-three-low-054152835.html",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "clickThroughUrl": {
+          "url": "https://finance.yahoo.com/markets/stocks/articles/indias-index-falls-three-low-054152835.html",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "metadata": {
+          "editorsPick": false
+        },
+        "finance": {
+          "premiumFinance": {
+            "isPremiumNews": false,
+            "isPremiumFreeNews": false
+          }
+        },
+        "storyline": null
+      }
+    },
+    {
+      "id": "7c521a34-81d4-3f17-a6e6-b8f5426df518",
+      "content": {
+        "id": "7c521a34-81d4-3f17-a6e6-b8f5426df518",
+        "contentType": "STORY",
+        "title": "India's IT index falls to three-year low on weak earnings outlook, demand worries",
+        "description": "",
+        "summary": "May 12 (Reuters) - India's Nifty IT index tumbled 3.6% on Tuesday to its lowest level since May 2023, as a weak earnings outlook and fears of slowing demand for traditional IT services rattled",
+        "pubDate": "2026-05-12T05:41:52Z",
+        "displayTime": "2026-05-12T05:41:52Z",
+        "isHosted": true,
+        "bypassModal": false,
+        "previewUrl": null,
+        "thumbnail": {
+          "originalUrl": "https://media.zenfs.com/en/reuters.com/a6d4a4aa776ec74f3e5d6feb34bcd2c9",
+          "originalWidth": 800,
+          "originalHeight": 533,
+          "caption": "FILE PHOTO: People walk outside the National Stock Exchange (NSE) in Mumbai, India, October 22, 2024. REUTERS/Francis Mascarenhas/File Photo",
+          "resolutions": [
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/YtSATlENqHSEN2ZLysTmMw--~B/aD01MzM7dz04MDA7YXBwaWQ9eXRhY2h5b24-/https://media.zenfs.com/en/reuters.com/a6d4a4aa776ec74f3e5d6feb34bcd2c9",
+              "width": 800,
+              "height": 533,
+              "tag": "original"
+            },
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/lP6t0eptBBjRzw1CUbKomQ--~B/Zmk9c3RyaW07aD0xMjg7dz0xNzA7YXBwaWQ9eXRhY2h5b24-/https://media.zenfs.com/en/reuters.com/a6d4a4aa776ec74f3e5d6feb34bcd2c9",
+              "width": 170,
+              "height": 128,
+              "tag": "170x128"
+            }
+          ]
+        },
+        "provider": {
+          "displayName": "Reuters",
+          "url": "https://www.reuters.com/",
+          "sourceId": "reuters.com"
+        },
+        "canonicalUrl": {
+          "url": "https://sg.finance.yahoo.com/news/indias-index-falls-three-low-054152871.html",
+          "site": "finance",
+          "region": "SG",
+          "lang": "en-SG"
+        },
+        "clickThroughUrl": {
+          "url": "https://finance.yahoo.com/news/indias-index-falls-three-low-054152871.html",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "metadata": {
+          "editorsPick": false
+        },
+        "finance": {
+          "premiumFinance": {
+            "isPremiumNews": false,
+            "isPremiumFreeNews": false
+          }
+        },
+        "storyline": null
+      }
+    },
+    {
+      "id": "833a6fe9-cae0-3db0-991a-9b701b8f490d",
+      "content": {
+        "id": "833a6fe9-cae0-3db0-991a-9b701b8f490d",
+        "contentType": "STORY",
+        "title": "Indian panel alleges 'toxic workplace environment' at TCS back office",
+        "description": "",
+        "summary": "By Arpan Chaturvedi and Aditya Kalra NEW DELHI, May 11 (Reuters) - India's National Commission for Women said on Monday it had found a \"toxic workplace environment\" at a Tata Consultancy Services back",
+        "pubDate": "2026-05-11T15:34:01Z",
+        "displayTime": "2026-05-11T15:34:01Z",
+        "isHosted": true,
+        "bypassModal": false,
+        "previewUrl": null,
+        "thumbnail": {
+          "originalUrl": "https://media.zenfs.com/en/reuters.com/7258c27d363be461801f9e4d54d5becb",
+          "originalWidth": 800,
+          "originalHeight": 505,
+          "caption": "FILE PHOTO: Figurines with computers and smartphones are seen in front of TCS: Tata Consultancy Services logo in this illustration taken, February 19, 2024. REUTERS/Dado Ruvic/Illustration/File Photo",
+          "resolutions": [
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/ph9jQmF5vFRpimm7.IW_4A--~B/aD01MDU7dz04MDA7YXBwaWQ9eXRhY2h5b24-/https://media.zenfs.com/en/reuters.com/7258c27d363be461801f9e4d54d5becb",
+              "width": 800,
+              "height": 505,
+              "tag": "original"
+            },
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/aQDIFRxuPqRhkr_GlepkxA--~B/Zmk9c3RyaW07aD0xMjg7dz0xNzA7YXBwaWQ9eXRhY2h5b24-/https://media.zenfs.com/en/reuters.com/7258c27d363be461801f9e4d54d5becb",
+              "width": 170,
+              "height": 128,
+              "tag": "170x128"
+            }
+          ]
+        },
+        "provider": {
+          "displayName": "Reuters",
+          "url": "https://www.reuters.com/",
+          "sourceId": "reuters.com"
+        },
+        "canonicalUrl": {
+          "url": "https://sg.finance.yahoo.com/news/indian-panel-alleges-toxic-workplace-153401732.html",
+          "site": "finance",
+          "region": "SG",
+          "lang": "en-SG"
+        },
+        "clickThroughUrl": {
+          "url": "https://finance.yahoo.com/news/indian-panel-alleges-toxic-workplace-153401732.html",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "metadata": {
+          "editorsPick": false
+        },
+        "finance": {
+          "premiumFinance": {
+            "isPremiumNews": false,
+            "isPremiumFreeNews": false
+          }
+        },
+        "storyline": null
+      }
+    }
+  ]
+}

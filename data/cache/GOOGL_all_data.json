@@ -1,0 +1,1182 @@
+{
+  "symbol": "GOOGL",
+  "fetch_time": "2026-06-01T11:48:56.324993",
+  "metadata": {
+    "symbol": "GOOGL",
+    "fetch_timestamp": "2026-06-01T11:48:56.319511",
+    "period": "1mo",
+    "data_source": "yfinance",
+    "has_news": true
+  },
+  "price_history": [
+    {
+      "Open": 374.07000732421875,
+      "High": 385.8399963378906,
+      "Low": 365.82000732421875,
+      "Close": 384.79998779296875,
+      "Volume": 72040000,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-04-30 00:00:00-04:00"
+    },
+    {
+      "Open": 381.6300048828125,
+      "High": 386.760009765625,
+      "Low": 379.04998779296875,
+      "Close": 385.69000244140625,
+      "Volume": 30105200,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-01 00:00:00-04:00"
+    },
+    {
+      "Open": 385.6300048828125,
+      "High": 387.3800048828125,
+      "Low": 379.7900085449219,
+      "Close": 383.25,
+      "Volume": 26298600,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-04 00:00:00-04:00"
+    },
+    {
+      "Open": 386.2300109863281,
+      "High": 392.82000732421875,
+      "Low": 384.0199890136719,
+      "Close": 388.42999267578125,
+      "Volume": 23878600,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-05 00:00:00-04:00"
+    },
+    {
+      "Open": 394.25,
+      "High": 399.8500061035156,
+      "Low": 392.760009765625,
+      "Close": 398.0400085449219,
+      "Volume": 31308500,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-06 00:00:00-04:00"
+    },
+    {
+      "Open": 399.9200134277344,
+      "High": 400.1000061035156,
+      "Low": 392.67999267578125,
+      "Close": 397.989990234375,
+      "Volume": 24433500,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-07 00:00:00-04:00"
+    },
+    {
+      "Open": 397.0,
+      "High": 402.0,
+      "Low": 396.3599853515625,
+      "Close": 400.79998779296875,
+      "Volume": 21461800,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-08 00:00:00-04:00"
+    },
+    {
+      "Open": 393.6499938964844,
+      "High": 397.44000244140625,
+      "Low": 388.4700012207031,
+      "Close": 388.6400146484375,
+      "Volume": 30753700,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-11 00:00:00-04:00"
+    },
+    {
+      "Open": 387.3399963378906,
+      "High": 388.5199890136719,
+      "Low": 382.7699890136719,
+      "Close": 387.3500061035156,
+      "Volume": 26017500,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-12 00:00:00-04:00"
+    },
+    {
+      "Open": 385.6000061035156,
+      "High": 403.70001220703125,
+      "Low": 385.0,
+      "Close": 402.6199951171875,
+      "Volume": 28144600,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-13 00:00:00-04:00"
+    },
+    {
+      "Open": 397.2799987792969,
+      "High": 402.92999267578125,
+      "Low": 395.8399963378906,
+      "Close": 401.07000732421875,
+      "Volume": 21136700,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-14 00:00:00-04:00"
+    },
+    {
+      "Open": 396.32000732421875,
+      "High": 399.5400085449219,
+      "Low": 393.17999267578125,
+      "Close": 396.7799987792969,
+      "Volume": 20309700,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-15 00:00:00-04:00"
+    },
+    {
+      "Open": 395.69000244140625,
+      "High": 408.6099853515625,
+      "Low": 394.5299987792969,
+      "Close": 396.94000244140625,
+      "Volume": 26837200,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-18 00:00:00-04:00"
+    },
+    {
+      "Open": 396.9599914550781,
+      "High": 397.1499938964844,
+      "Low": 386.1099853515625,
+      "Close": 387.6600036621094,
+      "Volume": 39545700,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-19 00:00:00-04:00"
+    },
+    {
+      "Open": 387.70001220703125,
+      "High": 393.8599853515625,
+      "Low": 382.8999938964844,
+      "Close": 388.9100036621094,
+      "Volume": 31744400,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-20 00:00:00-04:00"
+    },
+    {
+      "Open": 385.70001220703125,
+      "High": 392.5,
+      "Low": 383.0199890136719,
+      "Close": 387.6600036621094,
+      "Volume": 24852800,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-21 00:00:00-04:00"
+    },
+    {
+      "Open": 387.3500061035156,
+      "High": 388.739990234375,
+      "Low": 381.7699890136719,
+      "Close": 382.9700012207031,
+      "Volume": 20442100,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-22 00:00:00-04:00"
+    },
+    {
+      "Open": 384.510009765625,
+      "High": 389.260009765625,
+      "Low": 382.6000061035156,
+      "Close": 388.8800048828125,
+      "Volume": 27747400,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-26 00:00:00-04:00"
+    },
+    {
+      "Open": 386.6700134277344,
+      "High": 393.8800048828125,
+      "Low": 385.8999938964844,
+      "Close": 388.8299865722656,
+      "Volume": 23087300,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-27 00:00:00-04:00"
+    },
+    {
+      "Open": 388.0,
+      "High": 391.8699951171875,
+      "Low": 385.1600036621094,
+      "Close": 390.1300048828125,
+      "Volume": 24357500,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-28 00:00:00-04:00"
+    },
+    {
+      "Open": 385.239990234375,
+      "High": 385.239990234375,
+      "Low": 378.4599914550781,
+      "Close": 380.3399963378906,
+      "Volume": 44355000,
+      "Dividends": 0.0,
+      "Stock Splits": 0.0,
+      "Date": "2026-05-29 00:00:00-04:00"
+    }
+  ],
+  "info": {
+    "address1": "1600 Amphitheatre Parkway",
+    "city": "Mountain View",
+    "state": "CA",
+    "zip": "94043",
+    "country": "United States",
+    "phone": "650-253-0000",
+    "website": "https://abc.xyz",
+    "industry": "Internet Content & Information",
+    "industryKey": "internet-content-information",
+    "industryDisp": "Internet Content & Information",
+    "sector": "Communication Services",
+    "sectorKey": "communication-services",
+    "sectorDisp": "Communication Services",
+    "longBusinessSummary": "Alphabet Inc. offers various products and platforms in the United States, Europe, the Middle East, Africa, the Asia-Pacific, Canada, and Latin America. It operates through Google Services, Google Cloud, and Other Bets segments. The Google Services segment provides products and services, including ads, Android, Chrome, devices, Gmail, Google Drive, Google Maps, Google Photos, Google Play, Search, and YouTube. It is also involved in the sale of apps and in-app purchases and digital content in Google Play and YouTube; and devices, as well as the provision of YouTube consumer subscription services, such as YouTube TV, YouTube Music and Premium, NFL Sunday Ticket, and Google One. The Google Cloud segment offers consumption-based fees and subscriptions for AI solutions, including AI infrastructure, Vertex AI platform, and Gemini enterprise. It also provides cybersecurity, and data and analytics services; Google Workspace that include cloud-based communication and collaboration tools for enterprises, such as Calendar, Gmail, Docs, Drive, and Meet; and other enterprise services. The Other Bets segment sells transportation and internet services. Alphabet Inc. was incorporated in 1998 and is headquartered in Mountain View, California.",
+    "fullTimeEmployees": 194668,
+    "companyOfficers": [
+      {
+        "maxAge": 1,
+        "name": "Mr. Sundar  Pichai",
+        "age": 52,
+        "title": "CEO & Director",
+        "yearBorn": 1973,
+        "fiscalYear": 2025,
+        "totalPay": 10906079,
+        "exercisedValue": 0,
+        "unexercisedValue": 0
+      },
+      {
+        "maxAge": 1,
+        "name": "Ms. Ruth M. Porat",
+        "age": 67,
+        "title": "President & Chief Investment Officer",
+        "yearBorn": 1958,
+        "fiscalYear": 2025,
+        "totalPay": 1015596,
+        "exercisedValue": 0,
+        "unexercisedValue": 0
+      },
+      {
+        "maxAge": 1,
+        "name": "Dr. Lawrence Edward Page II",
+        "age": 52,
+        "title": "Co-Founder & Director",
+        "yearBorn": 1973,
+        "fiscalYear": 2025,
+        "totalPay": 1,
+        "exercisedValue": 0,
+        "unexercisedValue": 0
+      },
+      {
+        "maxAge": 1,
+        "name": "Mr. Sergey  Brin",
+        "age": 51,
+        "title": "Co-Founder & Director",
+        "yearBorn": 1974,
+        "fiscalYear": 2025,
+        "totalPay": 1,
+        "exercisedValue": 0,
+        "unexercisedValue": 0
+      },
+      {
+        "maxAge": 1,
+        "name": "Ms. Anat  Ashkenazi",
+        "age": 52,
+        "title": "Senior VP & CFO",
+        "yearBorn": 1973,
+        "fiscalYear": 2025,
+        "totalPay": 1087961,
+        "exercisedValue": 0,
+        "unexercisedValue": 0
+      },
+      {
+        "maxAge": 1,
+        "name": "Mr. J. Kent Walker",
+        "age": 64,
+        "title": "President of Global Affairs, Chief Legal Officer & Company Secretary",
+        "yearBorn": 1961,
+        "fiscalYear": 2025,
+        "totalPay": 1015596,
+        "exercisedValue": 0,
+        "unexercisedValue": 0
+      },
+      {
+        "maxAge": 1,
+        "name": "Mr. Philipp  Schindler",
+        "age": 54,
+        "title": "Senior Vice President & Chief Business Officer of Google",
+        "yearBorn": 1971,
+        "fiscalYear": 2025,
+        "totalPay": 1623997,
+        "exercisedValue": 0,
+        "unexercisedValue": 0
+      },
+      {
+        "maxAge": 1,
+        "name": "Mr. James H. Friedland",
+        "age": 55,
+        "title": "Head of Investor Relations",
+        "yearBorn": 1970,
+        "fiscalYear": 2025,
+        "exercisedValue": 0,
+        "unexercisedValue": 0
+      },
+      {
+        "maxAge": 1,
+        "name": "Ms. Fiona Clare Cicconi",
+        "age": 59,
+        "title": "Chief People Officer",
+        "yearBorn": 1966,
+        "fiscalYear": 2025,
+        "exercisedValue": 0,
+        "unexercisedValue": 0
+      },
+      {
+        "maxAge": 1,
+        "name": "Ms. Ivy  Ross",
+        "age": 69,
+        "title": "VP & Head of Design for all Hardware Products",
+        "yearBorn": 1956,
+        "fiscalYear": 2025,
+        "exercisedValue": 0,
+        "unexercisedValue": 0
+      }
+    ],
+    "auditRisk": 7,
+    "boardRisk": 9,
+    "compensationRisk": 10,
+    "shareHolderRightsRisk": 10,
+    "overallRisk": 10,
+    "governanceEpochDate": 1777593600,
+    "compensationAsOfEpochDate": 1767139200,
+    "executiveTeam": [],
+    "maxAge": 86400,
+    "priceHint": 2,
+    "previousClose": 390.13,
+    "open": 385.24,
+    "dayLow": 378.46,
+    "dayHigh": 385.24,
+    "regularMarketPreviousClose": 390.13,
+    "regularMarketOpen": 385.24,
+    "regularMarketDayLow": 378.46,
+    "regularMarketDayHigh": 385.24,
+    "dividendRate": 0.88,
+    "dividendYield": 0.23,
+    "exDividendDate": 1780876800,
+    "payoutRatio": 0.0641,
+    "beta": 1.267,
+    "trailingPE": 28.989328,
+    "forwardPE": 26.249208,
+    "volume": 44415846,
+    "regularMarketVolume": 44415846,
+    "averageVolume": 28293636,
+    "averageVolume10days": 28327910,
+    "averageDailyVolume10Day": 28327910,
+    "bid": 377.53,
+    "ask": 399.0,
+    "bidSize": 3,
+    "askSize": 1,
+    "marketCap": 4607987679232,
+    "nonDilutedMarketCap": 4586655069531,
+    "fiftyTwoWeekLow": 162.0,
+    "fiftyTwoWeekHigh": 408.61,
+    "allTimeHigh": 408.61,
+    "allTimeLow": 2.401401,
+    "priceToSalesTrailing12Months": 10.906531,
+    "fiftyDayAverage": 347.5748,
+    "twoHundredDayAverage": 299.92114,
+    "trailingAnnualDividendRate": 0.84,
+    "trailingAnnualDividendYield": 0.0021531284,
+    "currency": "USD",
+    "tradeable": false,
+    "enterpriseValue": 4577235566592,
+    "profitMargins": 0.37919,
+    "floatShares": 10813651160,
+    "sharesOutstanding": 5823665113,
+    "sharesShort": 82143498,
+    "sharesShortPriorMonth": 78071445,
+    "sharesShortPreviousMonthDate": 1776211200,
+    "dateShortInterest": 1778803200,
+    "sharesPercentSharesOut": 0.0068,
+    "heldPercentInsiders": 0.01181,
+    "heldPercentInstitutions": 0.81103,
+    "shortRatio": 3.02,
+    "shortPercentOfFloat": 0.014099999,
+    "impliedSharesOutstanding": 12115444154,
+    "bookValue": 39.514,
+    "priceToBook": 9.625449,
+    "lastFiscalYearEnd": 1767139200,
+    "nextFiscalYearEnd": 1798675200,
+    "mostRecentQuarter": 1774915200,
+    "earningsQuarterlyGrowth": 0.812,
+    "netIncomeToCommon": 160207994880,
+    "trailingEps": 13.12,
+    "forwardEps": 14.48958,
+    "pegRatio": 1.5,
+    "lastSplitFactor": "20:1",
+    "lastSplitDate": 1658102400,
+    "enterpriseToRevenue": 10.834,
+    "enterpriseToEbitda": 28.374,
+    "52WeekChange": 1.250133,
+    "SandP52WeekChange": 0.27697718,
+    "lastDividendValue": 0.21,
+    "lastDividendDate": 1773014400,
+    "quoteType": "EQUITY",
+    "currentPrice": 380.34,
+    "targetHighPrice": 515.0,
+    "targetLowPrice": 340.0,
+    "targetMeanPrice": 430.7213,
+    "targetMedianPrice": 430.0,
+    "recommendationMean": 1.4375,
+    "recommendationKey": "strong_buy",
+    "numberOfAnalystOpinions": 53,
+    "totalCash": 126839996416,
+    "totalCashPerShare": 10.469,
+    "ebitda": 161315995648,
+    "totalDebt": 95875997696,
+    "quickRatio": 1.707,
+    "currentRatio": 1.922,
+    "totalRevenue": 422498009088,
+    "debtToEquity": 20.026,
+    "revenuePerShare": 34.932,
+    "returnOnAssets": 0.14641,
+    "returnOnEquity": 0.38884997,
+    "grossProfits": 255053004800,
+    "freeCashflow": 27921750016,
+    "operatingCashflow": 174353006592,
+    "earningsGrowth": 0.82,
+    "revenueGrowth": 0.218,
+    "grossMargins": 0.60368,
+    "ebitdaMargins": 0.38181,
+    "operatingMargins": 0.36121,
+    "financialCurrency": "USD",
+    "symbol": "GOOGL",
+    "language": "en-US",
+    "region": "US",
+    "typeDisp": "Equity",
+    "quoteSourceName": "Nasdaq Real Time Price",
+    "triggerable": true,
+    "customPriceAlertConfidence": "HIGH",
+    "longName": "Alphabet Inc.",
+    "corporateActions": [
+      {
+        "header": "Dividend",
+        "message": "GOOGL announced a cash dividend of $0.22 with an ex-date of Jun. 8, 2026",
+        "meta": {
+          "eventType": "DIVIDEND",
+          "dateEpochMs": 1780891200000,
+          "amount": "0.22"
+        }
+      }
+    ],
+    "postMarketTime": 1780099199,
+    "regularMarketTime": 1780084801,
+    "exchange": "NMS",
+    "messageBoardId": "finmb_29096",
+    "exchangeTimezoneName": "America/New_York",
+    "exchangeTimezoneShortName": "EDT",
+    "gmtOffSetMilliseconds": -14400000,
+    "market": "us_market",
+    "esgPopulated": false,
+    "regularMarketChangePercent": -2.509422,
+    "regularMarketPrice": 380.34,
+    "shortName": "Alphabet Inc.",
+    "hasPrePostMarketData": true,
+    "firstTradeDateMilliseconds": 1092922200000,
+    "postMarketChangePercent": 0.08413717,
+    "postMarketPrice": 380.66,
+    "postMarketChange": 0.32000732,
+    "regularMarketChange": -9.790009,
+    "regularMarketDayRange": "378.46 - 385.24",
+    "fullExchangeName": "NasdaqGS",
+    "averageDailyVolume3Month": 28293636,
+    "fiftyTwoWeekLowChange": 218.34,
+    "fiftyTwoWeekLowChangePercent": 1.3477777,
+    "fiftyTwoWeekRange": "162.0 - 408.61",
+    "fiftyTwoWeekHighChange": -28.269989,
+    "fiftyTwoWeekHighChangePercent": -0.06918575,
+    "fiftyTwoWeekChangePercent": 125.013306,
+    "dividendDate": 1781481600,
+    "earningsTimestamp": 1777492800,
+    "earningsTimestampStart": 1784836800,
+    "earningsTimestampEnd": 1784836800,
+    "earningsCallTimestampStart": 1777494600,
+    "earningsCallTimestampEnd": 1777494600,
+    "isEarningsDateEstimate": true,
+    "epsTrailingTwelveMonths": 13.12,
+    "epsForward": 14.48958,
+    "epsCurrentYear": 14.23566,
+    "priceEpsCurrentYear": 26.717413,
+    "fiftyDayAverageChange": 32.765198,
+    "fiftyDayAverageChangePercent": 0.09426805,
+    "twoHundredDayAverageChange": 80.41885,
+    "twoHundredDayAverageChangePercent": 0.2681333,
+    "sourceInterval": 15,
+    "exchangeDataDelayedBy": 0,
+    "averageAnalystRating": "1.4 - Strong Buy",
+    "cryptoTradeable": false,
+    "marketState": "PREPRE",
+    "trailingPegRatio": 1.4975
+  },
+  "key_metrics": {
+    "marketCap": 4607987679232,
+    "enterpriseValue": 4577235566592,
+    "priceToBook": 9.625449,
+    "priceToSalesTrailing12Months": 10.906531,
+    "profitMargins": 0.37919,
+    "operatingMargins": 0.36121,
+    "returnOnAssets": 0.14641,
+    "returnOnEquity": 0.38884997,
+    "totalCash": 126839996416,
+    "totalDebt": 95875997696,
+    "debtToEquity": 20.026,
+    "currentRatio": 1.922,
+    "quickRatio": 1.707,
+    "trailingEps": 13.12,
+    "forwardEps": 14.48958,
+    "trailingPE": 28.989328,
+    "forwardPE": 26.249208,
+    "pegRatio": 1.5,
+    "dividendRate": 0.88,
+    "dividendYield": 0.23,
+    "payoutRatio": 0.0641,
+    "revenueGrowth": 0.218,
+    "earningsGrowth": 0.82,
+    "earningsQuarterlyGrowth": 0.812,
+    "beta": 1.267,
+    "fiftyTwoWeekLow": 162.0,
+    "fiftyTwoWeekHigh": 408.61,
+    "fiftyDayAverage": 347.5748,
+    "targetHighPrice": 515.0,
+    "targetLowPrice": 340.0,
+    "targetMeanPrice": 430.7213,
+    "targetMedianPrice": 430.0,
+    "recommendationMean": 1.4375,
+    "recommendationKey": "strong_buy",
+    "numberOfAnalystOpinions": 53,
+    "sector": "Communication Services",
+    "industry": "Internet Content & Information",
+    "country": "United States",
+    "fullTimeEmployees": 194668
+  },
+  "news": [
+    {
+      "id": "0b746104-bb48-466a-b780-ab0f5693dc84",
+      "content": {
+        "id": "0b746104-bb48-466a-b780-ab0f5693dc84",
+        "contentType": "STORY",
+        "title": "Big Tech companies are screwing the average investor \u2014 here's how",
+        "description": "",
+        "summary": "Time for some stock splits!",
+        "pubDate": "2026-05-31T12:30:00Z",
+        "displayTime": "2026-05-31T12:30:00Z",
+        "isHosted": true,
+        "bypassModal": false,
+        "previewUrl": null,
+        "thumbnail": {
+          "originalUrl": "https://s.yimg.com/uu/api/res/1.2/I4e6xUx5mC7futhJex8qhw--~B/aD00MzA5O3c9NjI3MjthcHBpZD15dGFjaHlvbg--/https://d29szjachogqwa.cloudfront.net/images/2026-05/82917675-2cac-4b00-a868-72d97b4d96a0",
+          "originalWidth": 6272,
+          "originalHeight": 4309,
+          "caption": "",
+          "resolutions": [
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/I4e6xUx5mC7futhJex8qhw--~B/aD00MzA5O3c9NjI3MjthcHBpZD15dGFjaHlvbg--/https://d29szjachogqwa.cloudfront.net/images/2026-05/82917675-2cac-4b00-a868-72d97b4d96a0",
+              "width": 6272,
+              "height": 4309,
+              "tag": "original"
+            },
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/HAtig._mfI_GkxQBS0ilrw--~B/Zmk9c3RyaW07aD0xMjg7dz0xNzA7YXBwaWQ9eXRhY2h5b24-/https://d29szjachogqwa.cloudfront.net/images/2026-05/82917675-2cac-4b00-a868-72d97b4d96a0",
+              "width": 170,
+              "height": 128,
+              "tag": "170x128"
+            }
+          ]
+        },
+        "provider": {
+          "displayName": "Yahoo Finance",
+          "url": "http://finance.yahoo.com/",
+          "sourceId": "yahoofinance.com"
+        },
+        "canonicalUrl": {
+          "url": "https://finance.yahoo.com/markets/article/big-tech-companies-are-screwing-the-average-investor--heres-how-123000495.html",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "clickThroughUrl": {
+          "url": "https://finance.yahoo.com/markets/article/big-tech-companies-are-screwing-the-average-investor--heres-how-123000495.html",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "metadata": {
+          "editorsPick": true
+        },
+        "finance": {
+          "premiumFinance": {
+            "isPremiumNews": false,
+            "isPremiumFreeNews": false
+          }
+        },
+        "storyline": null
+      }
+    },
+    {
+      "id": "18141fba-f6d5-4136-8d06-b23b1e3ca6b6",
+      "content": {
+        "id": "18141fba-f6d5-4136-8d06-b23b1e3ca6b6",
+        "contentType": "STORY",
+        "title": "IPOs are no longer Wall Street's starting line \u2014 they're the exit ramp: Chart of the Day",
+        "description": "",
+        "summary": "Wall Street used to get the growth story early. Now it often only gets the receipt.",
+        "pubDate": "2026-05-31T11:44:34Z",
+        "displayTime": "2026-05-31T11:44:34Z",
+        "isHosted": true,
+        "bypassModal": false,
+        "previewUrl": null,
+        "thumbnail": {
+          "originalUrl": "https://s.yimg.com/uu/api/res/1.2/cP9Eq_.hczusjext5jErYw--~B/aD0xOTExO3c9MzAwMDthcHBpZD15dGFjaHlvbg--/https://d29szjachogqwa.cloudfront.net/images/2026-05/d08a4204-d77e-4df8-aa08-bfb34811a447",
+          "originalWidth": 3000,
+          "originalHeight": 1911,
+          "caption": "",
+          "resolutions": [
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/cP9Eq_.hczusjext5jErYw--~B/aD0xOTExO3c9MzAwMDthcHBpZD15dGFjaHlvbg--/https://d29szjachogqwa.cloudfront.net/images/2026-05/d08a4204-d77e-4df8-aa08-bfb34811a447",
+              "width": 3000,
+              "height": 1911,
+              "tag": "original"
+            },
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/HARdnBurLTjO6QUW6Qmc7g--~B/Zmk9c3RyaW07aD0xMjg7dz0xNzA7YXBwaWQ9eXRhY2h5b24-/https://d29szjachogqwa.cloudfront.net/images/2026-05/d08a4204-d77e-4df8-aa08-bfb34811a447",
+              "width": 170,
+              "height": 128,
+              "tag": "170x128"
+            }
+          ]
+        },
+        "provider": {
+          "displayName": "Yahoo Finance",
+          "url": "http://finance.yahoo.com/",
+          "sourceId": "yahoofinance.com"
+        },
+        "canonicalUrl": {
+          "url": "https://finance.yahoo.com/markets/article/ipos-are-no-longer-wall-streets-starting-line--theyre-the-exit-ramp-chart-of-the-day-114434009.html",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "clickThroughUrl": {
+          "url": "https://finance.yahoo.com/markets/article/ipos-are-no-longer-wall-streets-starting-line--theyre-the-exit-ramp-chart-of-the-day-114434009.html",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "metadata": {
+          "editorsPick": true
+        },
+        "finance": {
+          "premiumFinance": {
+            "isPremiumNews": false,
+            "isPremiumFreeNews": false
+          }
+        },
+        "storyline": null
+      }
+    },
+    {
+      "id": "634f3e9a-e092-333e-b4f9-4a3d3b5f3938",
+      "content": {
+        "id": "634f3e9a-e092-333e-b4f9-4a3d3b5f3938",
+        "contentType": "STORY",
+        "title": "Analysis-AI debt sales reshape global corporate bond markets",
+        "description": "",
+        "summary": "From Europe to Japan and Switzerland, huge bond issues by Big Tech companies are proving that smaller markets, often overshadowed by the U.S., can punch above their weight in the $40 trillion world of corporate debt.  Google-parent Alphabet is already one of the biggest \u200coutstanding borrowers in the sterling and Swiss franc corporate bond markets, while Amazon raised 14.5 billion euros ($16.88 billion) in March from an eight-part deal, the \u200clargest ever in the euro corporate bond market, according to LSEG.  Debt issues by so-called \"hyperscalers\" - or Big Tech companies - outside the United States are part of a push to diversify their funding early on, bankers said, as \u200bthey look to finance trillions of dollars of investment in AI infrastructure, especially data centers, in the years ahead.",
+        "pubDate": "2026-06-01T05:01:29Z",
+        "displayTime": "2026-06-01T05:01:29Z",
+        "isHosted": true,
+        "bypassModal": false,
+        "previewUrl": null,
+        "thumbnail": {
+          "originalUrl": "https://media.zenfs.com/en/reuters-finance.com/a07f80cd7854a8899c83475c625339fc",
+          "originalWidth": 800,
+          "originalHeight": 534,
+          "caption": "FILE PHOTO: Illustration shows message reading \"AI artificial intelligence,\" keyboard and robot hands",
+          "resolutions": [
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/aYZK7xsr8gNTv6PXLufW2Q--~B/aD01MzQ7dz04MDA7YXBwaWQ9eXRhY2h5b24-/https://media.zenfs.com/en/reuters-finance.com/a07f80cd7854a8899c83475c625339fc",
+              "width": 800,
+              "height": 534,
+              "tag": "original"
+            },
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/tXv6gXK93goN5bRsvsGzqw--~B/Zmk9c3RyaW07aD0xMjg7dz0xNzA7YXBwaWQ9eXRhY2h5b24-/https://media.zenfs.com/en/reuters-finance.com/a07f80cd7854a8899c83475c625339fc",
+              "width": 170,
+              "height": 128,
+              "tag": "170x128"
+            }
+          ]
+        },
+        "provider": {
+          "displayName": "Reuters",
+          "url": "http://www.reuters.com/",
+          "sourceId": "reuters-finance.com"
+        },
+        "canonicalUrl": {
+          "url": "https://finance.yahoo.com/markets/stocks/articles/analysis-ai-debt-sales-reshape-050129222.html",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "clickThroughUrl": {
+          "url": "https://finance.yahoo.com/markets/stocks/articles/analysis-ai-debt-sales-reshape-050129222.html",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "metadata": {
+          "editorsPick": false
+        },
+        "finance": {
+          "premiumFinance": {
+            "isPremiumNews": false,
+            "isPremiumFreeNews": false
+          }
+        },
+        "storyline": null
+      }
+    },
+    {
+      "id": "450ed048-7263-3343-9238-6fc712007d41",
+      "content": {
+        "id": "450ed048-7263-3343-9238-6fc712007d41",
+        "contentType": "STORY",
+        "title": "Dell Stock Is Impossible to Ignore Right Now. Here's What to Do With It.",
+        "description": "",
+        "summary": "The technology company has shocked most investors, but the crowd may have also gotten a little ahead of itself.",
+        "pubDate": "2026-06-01T03:50:22Z",
+        "displayTime": "2026-06-01T03:50:22Z",
+        "isHosted": true,
+        "bypassModal": false,
+        "previewUrl": null,
+        "thumbnail": {
+          "originalUrl": "https://media.zenfs.com/en/motleyfool.com/f5de9b59dd9cd878c1bd5e2a5743ead5",
+          "originalWidth": 1400,
+          "originalHeight": 933,
+          "caption": "An investor sitting in front of several trading screens is analyzing a prospective investment.",
+          "resolutions": [
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/m6CYfLV1klgpaCIkRQaYtw--~B/aD05MzM7dz0xNDAwO2FwcGlkPXl0YWNoeW9u/https://media.zenfs.com/en/motleyfool.com/f5de9b59dd9cd878c1bd5e2a5743ead5",
+              "width": 1400,
+              "height": 933,
+              "tag": "original"
+            },
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/xcQWCqNPDfu5mJKQ5_GNOA--~B/Zmk9c3RyaW07aD0xMjg7dz0xNzA7YXBwaWQ9eXRhY2h5b24-/https://media.zenfs.com/en/motleyfool.com/f5de9b59dd9cd878c1bd5e2a5743ead5",
+              "width": 170,
+              "height": 128,
+              "tag": "170x128"
+            }
+          ]
+        },
+        "provider": {
+          "displayName": "Motley Fool",
+          "url": "http://www.fool.com/",
+          "sourceId": "motleyfool.com"
+        },
+        "canonicalUrl": {
+          "url": "https://www.fool.com/investing/2026/05/31/dell-stock-impossible-to-ignore-what-to-do-with-it/",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "clickThroughUrl": {
+          "url": "https://finance.yahoo.com/markets/stocks/articles/dell-stock-impossible-ignore-now-035022373.html",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "metadata": {
+          "editorsPick": false
+        },
+        "finance": {
+          "premiumFinance": {
+            "isPremiumNews": false,
+            "isPremiumFreeNews": false
+          }
+        },
+        "storyline": null
+      }
+    },
+    {
+      "id": "fd63b97c-c320-3202-b483-76d551ec4785",
+      "content": {
+        "id": "fd63b97c-c320-3202-b483-76d551ec4785",
+        "contentType": "STORY",
+        "title": "Dow Jones Futures, Oil Prices Rise As Trump Makes This Iran Move; Nvidia, Tesla Lead 5 Titans Near Buy Points",
+        "description": "",
+        "summary": "Crude oil prices rose Sunday as President Trump reportedly stiffened Iran deal terms. Nvidia, Tesla lead five titans near buy points.",
+        "pubDate": "2026-06-01T03:05:26Z",
+        "displayTime": "2026-06-01T03:05:26Z",
+        "isHosted": false,
+        "bypassModal": false,
+        "previewUrl": "https://finance.yahoo.com/m/fd63b97c-c320-3202-b483-76d551ec4785/dow-jones-futures-oil-prices.html",
+        "thumbnail": {
+          "originalUrl": "https://media.zenfs.com/en/ibd.com/389ceab456685d89e17184a36c78e0d2",
+          "originalWidth": 720,
+          "originalHeight": 454,
+          "caption": "",
+          "resolutions": [
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/KRozVlMShUDubLsA9pRekA--~B/aD00NTQ7dz03MjA7YXBwaWQ9eXRhY2h5b24-/https://media.zenfs.com/en/ibd.com/389ceab456685d89e17184a36c78e0d2",
+              "width": 720,
+              "height": 454,
+              "tag": "original"
+            },
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/0HvwHzwVjJCLrsV56FYzmw--~B/Zmk9c3RyaW07aD0xMjg7dz0xNzA7YXBwaWQ9eXRhY2h5b24-/https://media.zenfs.com/en/ibd.com/389ceab456685d89e17184a36c78e0d2",
+              "width": 170,
+              "height": 128,
+              "tag": "170x128"
+            }
+          ]
+        },
+        "provider": {
+          "displayName": "Investor's Business Daily",
+          "url": "http://www.investors.com/",
+          "sourceId": "ibd.com"
+        },
+        "canonicalUrl": {
+          "url": "https://www.investors.com/market-trend/stock-market-today/dow-jones-futures-iran-hopes-nvidia-tesla-stocks-near-buy-points/?src=A00220&yptr=yahoo",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "clickThroughUrl": null,
+        "metadata": {
+          "editorsPick": false
+        },
+        "finance": {
+          "premiumFinance": {
+            "isPremiumNews": false,
+            "isPremiumFreeNews": false
+          }
+        },
+        "storyline": null
+      }
+    },
+    {
+      "id": "fdba0563-b51e-3ae7-852f-f3faa134a340",
+      "content": {
+        "id": "fdba0563-b51e-3ae7-852f-f3faa134a340",
+        "contentType": "STORY",
+        "title": "A $3 Million Insurance Bet: What This Fund Might Be Seeing in Ryan Specialty Stock",
+        "description": "",
+        "summary": "Ryan Specialty Holdings delivers tailored insurance solutions for brokers and carriers seeking specialized risk management expertise.",
+        "pubDate": "2026-05-31T19:44:58Z",
+        "displayTime": "2026-05-31T19:44:58Z",
+        "isHosted": true,
+        "bypassModal": false,
+        "previewUrl": null,
+        "thumbnail": {
+          "originalUrl": "https://media.zenfs.com/en/motleyfool.com/3a72f91be739862dbb957fc97abbe64f",
+          "originalWidth": 800,
+          "originalHeight": 714,
+          "caption": "",
+          "resolutions": [
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/e_QpwjxaD3ylkQ3kRMTh1g--~B/aD03MTQ7dz04MDA7YXBwaWQ9eXRhY2h5b24-/https://media.zenfs.com/en/motleyfool.com/3a72f91be739862dbb957fc97abbe64f",
+              "width": 800,
+              "height": 714,
+              "tag": "original"
+            },
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/upbe.5QNOFOsYasaHllCPg--~B/Zmk9c3RyaW07aD0xMjg7dz0xNzA7YXBwaWQ9eXRhY2h5b24-/https://media.zenfs.com/en/motleyfool.com/3a72f91be739862dbb957fc97abbe64f",
+              "width": 170,
+              "height": 128,
+              "tag": "170x128"
+            }
+          ]
+        },
+        "provider": {
+          "displayName": "Motley Fool",
+          "url": "http://www.fool.com/",
+          "sourceId": "motleyfool.com"
+        },
+        "canonicalUrl": {
+          "url": "https://www.fool.com/coverage/filings/2026/05/31/a-usd3-million-insurance-bet-what-this-fund-might-be-seeing-in-ryan-specialty-stock/",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "clickThroughUrl": {
+          "url": "https://finance.yahoo.com/markets/stocks/articles/3-million-insurance-bet-fund-194458894.html",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "metadata": {
+          "editorsPick": false
+        },
+        "finance": {
+          "premiumFinance": {
+            "isPremiumNews": false,
+            "isPremiumFreeNews": false
+          }
+        },
+        "storyline": null
+      }
+    },
+    {
+      "id": "d63439ac-0725-3d47-933d-38e68138b335",
+      "content": {
+        "id": "d63439ac-0725-3d47-933d-38e68138b335",
+        "contentType": "STORY",
+        "title": "Meta Has a Plan to Monetize Its AI Investments. Its Underperforming Stock Needs It Badly.",
+        "description": "",
+        "summary": "Meta Platforms is rolling out subscriptions for its family of apps as well as AI services. The subscriptions could drive its long-term growth and help the company monetize its AI capex.",
+        "pubDate": "2026-05-31T18:00:02Z",
+        "displayTime": "2026-05-31T18:00:02Z",
+        "isHosted": true,
+        "bypassModal": false,
+        "previewUrl": null,
+        "thumbnail": {
+          "originalUrl": "https://media.zenfs.com/en/barchart_com_477/d0d9789908dfe70540529ddf7c69c98a",
+          "originalWidth": 1000,
+          "originalHeight": 563,
+          "caption": "Meta Platforms Inc sign with logo by- Poetra_RH via Shutterstock",
+          "resolutions": [
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/a_x6q03Zgwr8luPeoTXYvg--~B/aD01NjM7dz0xMDAwO2FwcGlkPXl0YWNoeW9u/https://media.zenfs.com/en/barchart_com_477/d0d9789908dfe70540529ddf7c69c98a",
+              "width": 1000,
+              "height": 563,
+              "tag": "original"
+            },
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/OWBK1ATolc58bg_g1of5eA--~B/Zmk9c3RyaW07aD0xMjg7dz0xNzA7YXBwaWQ9eXRhY2h5b24-/https://media.zenfs.com/en/barchart_com_477/d0d9789908dfe70540529ddf7c69c98a",
+              "width": 170,
+              "height": 128,
+              "tag": "170x128"
+            }
+          ]
+        },
+        "provider": {
+          "displayName": "Barchart",
+          "url": "https://www.barchart.com/",
+          "sourceId": "barchart_com_477"
+        },
+        "canonicalUrl": {
+          "url": "https://www.barchart.com/story/news/2224189/meta-has-a-plan-to-monetize-its-ai-investments-its-underperforming-stock-needs-it-badly",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "clickThroughUrl": {
+          "url": "https://finance.yahoo.com/markets/stocks/articles/meta-plan-monetize-ai-investments-180002193.html",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "metadata": {
+          "editorsPick": false
+        },
+        "finance": {
+          "premiumFinance": {
+            "isPremiumNews": false,
+            "isPremiumFreeNews": false
+          }
+        },
+        "storyline": null
+      }
+    },
+    {
+      "id": "debad324-942e-33d3-8f82-e26dcaff7607",
+      "content": {
+        "id": "debad324-942e-33d3-8f82-e26dcaff7607",
+        "contentType": "STORY",
+        "title": "One Google Employee Used The Company\u2019s Internal Data To Bet On Polymarket And Won $1.2M, DOJ Says",
+        "description": "",
+        "summary": "US prosecutors alleged a Switzerland-based Google employee wagered $2.75 million through a Polymarket account named \u201cAlphaRaccoon\u201d between October and December last year.",
+        "pubDate": "2026-05-31T15:50:56Z",
+        "displayTime": "2026-05-31T15:50:56Z",
+        "isHosted": true,
+        "bypassModal": false,
+        "previewUrl": null,
+        "thumbnail": {
+          "originalUrl": "https://media.zenfs.com/en/stocktwits_383/14909ec12c6e28f06530c9d95831c248",
+          "originalWidth": 1280,
+          "originalHeight": 867,
+          "caption": "",
+          "resolutions": [
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/kuDGh65s3rL00ELiSQmx_g--~B/aD04Njc7dz0xMjgwO2FwcGlkPXl0YWNoeW9u/https://media.zenfs.com/en/stocktwits_383/14909ec12c6e28f06530c9d95831c248",
+              "width": 1280,
+              "height": 867,
+              "tag": "original"
+            },
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/S62iv0s4yzpUZbIy7nCfaA--~B/Zmk9c3RyaW07aD0xMjg7dz0xNzA7YXBwaWQ9eXRhY2h5b24-/https://media.zenfs.com/en/stocktwits_383/14909ec12c6e28f06530c9d95831c248",
+              "width": 170,
+              "height": 128,
+              "tag": "170x128"
+            }
+          ]
+        },
+        "provider": {
+          "displayName": "Stocktwits",
+          "url": "Stocktwits",
+          "sourceId": "stocktwits_383"
+        },
+        "canonicalUrl": {
+          "url": "https://stocktwits.com/news-articles/markets/cryptocurrency/google-employee-bet-polymarket-insider-trading/cZgFExdReuL",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "clickThroughUrl": {
+          "url": "https://finance.yahoo.com/markets/crypto/articles/one-google-employee-used-company-155056876.html",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "metadata": {
+          "editorsPick": false
+        },
+        "finance": {
+          "premiumFinance": {
+            "isPremiumNews": false,
+            "isPremiumFreeNews": false
+          }
+        },
+        "storyline": null
+      }
+    },
+    {
+      "id": "d2dee47c-9425-33c4-8183-616ee1ae1cd2",
+      "content": {
+        "id": "d2dee47c-9425-33c4-8183-616ee1ae1cd2",
+        "contentType": "STORY",
+        "title": "Quantum Computing Just Hit Commercial Viability and These 3 ETFs Sit on Top of the Compute Transition",
+        "description": "",
+        "summary": "The quantum computing trade has shifted from a speculative bet to an identifiable, investable theme, and the three exchange-traded funds that best capture it each take a different angle on the same transition. Defiance Quantum ETF (NYSEARCA:QTUM) holds a pure-play roster of qubit makers and quantum-adjacent semiconductor companies. ARK Autonomous Technology & Robotics ETF (NYSEARCA:ARKQ) ... Quantum Computing Just Hit Commercial Viability and These 3 ETFs Sit on Top of the Compute Transition",
+        "pubDate": "2026-05-31T15:15:35Z",
+        "displayTime": "2026-05-31T15:15:35Z",
+        "isHosted": true,
+        "bypassModal": false,
+        "previewUrl": null,
+        "thumbnail": {
+          "originalUrl": "https://media.zenfs.com/en/24_7_wall_st__718/21b6daec93c480054cdcf0ad805519ca",
+          "originalWidth": 1500,
+          "originalHeight": 759,
+          "caption": "",
+          "resolutions": [
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/cEc6xYLBUbT0pxtEuQjbaw--~B/aD03NTk7dz0xNTAwO2FwcGlkPXl0YWNoeW9u/https://media.zenfs.com/en/24_7_wall_st__718/21b6daec93c480054cdcf0ad805519ca",
+              "width": 1500,
+              "height": 759,
+              "tag": "original"
+            },
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/K2mf7i3G5VeKzUOSSOER2A--~B/Zmk9c3RyaW07aD0xMjg7dz0xNzA7YXBwaWQ9eXRhY2h5b24-/https://media.zenfs.com/en/24_7_wall_st__718/21b6daec93c480054cdcf0ad805519ca",
+              "width": 170,
+              "height": 128,
+              "tag": "170x128"
+            }
+          ]
+        },
+        "provider": {
+          "displayName": "24/7 Wall St.",
+          "url": "https://247wallst.com/",
+          "sourceId": "24_7_wall_st__718"
+        },
+        "canonicalUrl": {
+          "url": "https://247wallst.com/investing/2026/05/31/quantum-computing-just-hit-commercial-viability-and-these-3-etfs-sit-on-top-of-the-compute-transition/",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "clickThroughUrl": {
+          "url": "https://finance.yahoo.com/sectors/technology/articles/quantum-computing-just-hit-commercial-151535454.html",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "metadata": {
+          "editorsPick": false
+        },
+        "finance": {
+          "premiumFinance": {
+            "isPremiumNews": false,
+            "isPremiumFreeNews": false
+          }
+        },
+        "storyline": null
+      }
+    },
+    {
+      "id": "9c9d5727-0cbe-355c-af08-41ef7fc996b4",
+      "content": {
+        "id": "9c9d5727-0cbe-355c-af08-41ef7fc996b4",
+        "contentType": "STORY",
+        "title": "Google Just Changed Enlight Renewable Energy Stock\u2019s Entire Growth Story",
+        "description": "",
+        "summary": "Enlight Renewable Energy surged after securing a long-term Google power agreement, reinforcing its growing role in the AI-driven electricity infrastructure boom.",
+        "pubDate": "2026-05-31T14:00:02Z",
+        "displayTime": "2026-05-31T14:00:02Z",
+        "isHosted": true,
+        "bypassModal": false,
+        "previewUrl": null,
+        "thumbnail": {
+          "originalUrl": "https://media.zenfs.com/en/barchart_com_477/92d6b49a0ea8eb66683e988a70dff7ff",
+          "originalWidth": 1600,
+          "originalHeight": 897,
+          "caption": "Green Energy Harvest by Nordic Studio via Shuttershock",
+          "resolutions": [
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/YHNXW8YVA1HsNsXvxGT8DA--~B/aD04OTc7dz0xNjAwO2FwcGlkPXl0YWNoeW9u/https://media.zenfs.com/en/barchart_com_477/92d6b49a0ea8eb66683e988a70dff7ff",
+              "width": 1600,
+              "height": 897,
+              "tag": "original"
+            },
+            {
+              "url": "https://s.yimg.com/uu/api/res/1.2/1WpRUHuarU6FMICymhFeFQ--~B/Zmk9c3RyaW07aD0xMjg7dz0xNzA7YXBwaWQ9eXRhY2h5b24-/https://media.zenfs.com/en/barchart_com_477/92d6b49a0ea8eb66683e988a70dff7ff",
+              "width": 170,
+              "height": 128,
+              "tag": "170x128"
+            }
+          ]
+        },
+        "provider": {
+          "displayName": "Barchart",
+          "url": "https://www.barchart.com/",
+          "sourceId": "barchart_com_477"
+        },
+        "canonicalUrl": {
+          "url": "https://www.barchart.com/story/news/2223265/google-just-changed-enlight-renewable-energy-stocks-entire-growth-story",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "clickThroughUrl": {
+          "url": "https://finance.yahoo.com/sectors/energy/articles/google-just-changed-enlight-renewable-140002823.html",
+          "site": "finance",
+          "region": "US",
+          "lang": "en-US"
+        },
+        "metadata": {
+          "editorsPick": false
+        },
+        "finance": {
+          "premiumFinance": {
+            "isPremiumNews": false,
+            "isPremiumFreeNews": false
+          }
+        },
+        "storyline": null
+      }
+    }
+  ]
+}

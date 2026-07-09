@@ -47,18 +47,26 @@ export default function HftPage() {
     // Poll for bot status separately — only every 30 s while analysis is running
     // so we don't flood the busy event loop with 120 s-timeout requests.
     useEffect(() => {
+        let consecutiveFailures = 0;
+
         const checkStatus = async () => {
             try {
                 const res = await hftApiService.getBotStatus();
                 setGlobalBotStatus(res.status);
+                consecutiveFailures = 0;
             } catch (e) {
-                // Silent catch — status is non-critical
+            consecutiveFailures++;
+            // After 3 failed checks in a row, don't leave the user stuck —
+            // assume the bot is actually fine and stop blocking the UI.
+            if (consecutiveFailures >= 3) {
+                setGlobalBotStatus(prev => prev === 'INITIALIZING' ? 'READY' : prev);
             }
-        };
-        checkStatus();
-        const interval = setInterval(checkStatus, 30000); // 30 s
-        return () => clearInterval(interval);
-    }, []);
+        }
+    };
+    checkStatus();
+    const interval = setInterval(checkStatus, 30000); // 30 s
+    return () => clearInterval(interval);
+}, []);
 
     // SSE stream: connect once and keep alive; also do an initial REST load
     useEffect(() => {
@@ -231,35 +239,39 @@ export default function HftPage() {
 
 
     const handleStartBot = async () => {
-        try {
-            setLoading(true);
-            // 1. Load this user's personal watchlist from MongoDB
-            const userTickers = await userAPI.getWatchlist();
-            // 2. If the user has tickers, sync them to the bot before starting
-            if (userTickers.length > 0) {
-                try {
-                    await hftApiService.bulkUpdateWatchlist(userTickers, 'ADD');
-                } catch {
-                    // If bulk update fails, still try to start
-                }
-            }
-            // 3. Start the bot (it now has the user's tickers)
-            await hftApiService.startBot();
-            // 4. New run: remount analysis panels so they never show cached/previous output
-            setBotRunKey(k => k + 1);
-            // 5. Mark as running so panels show "Processing" until backend finishes
-            setBotData(prev => ({ ...prev, isRunning: true }));
-            setGlobalBotStatus('INITIALIZING');
-            toast.success('Bot started! Wait for analysis to finish before results appear.');
-            // 6. Refresh after a short delay to pick up backend state
-            setTimeout(() => refreshData(), 3000);
-        } catch (error) {
-            console.error('Error starting bot:', error);
-            toast.error('Failed to start bot');
-        } finally {
-            setLoading(false);
+    try {
+        setLoading(true);
+        const userTickers = await userAPI.getWatchlist();
+        if (userTickers.length > 0) {
+            try { await hftApiService.bulkUpdateWatchlist(userTickers, 'ADD'); } catch {}
         }
-    };
+        await hftApiService.startBot();
+        setBotRunKey(k => k + 1);
+        setBotData(prev => ({ ...prev, isRunning: true }));
+        setGlobalBotStatus('INITIALIZING');
+        toast.success('Bot started! Wait for analysis to finish before results appear.');
+
+        // Poll every 4s for up to 60s so INITIALIZING doesn't get stuck on a bad tick
+        let attempts = 0;
+        const fastPoll: ReturnType<typeof setInterval> = setInterval(async () => {
+            attempts++;
+            try {
+                const res = await hftApiService.getBotStatus();
+                setGlobalBotStatus(res.status);
+                if (res.status === 'READY' || attempts >= 15) clearInterval(fastPoll);
+            } catch {
+                if (attempts >= 15) clearInterval(fastPoll);
+            }
+        }, 4000);
+
+        setTimeout(() => refreshData(), 3000);
+    } catch (error) {
+        console.error('Error starting bot:', error);
+        toast.error('Failed to start bot');
+    } finally {
+        setLoading(false);
+    }
+};
 
     const handleStopBot = async () => {
         try {
