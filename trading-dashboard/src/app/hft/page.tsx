@@ -125,31 +125,33 @@ export default function HftPage() {
                 console.log(`✅ ${data.symbol} analysis complete (${data.completed}/${data.total})`);
                 // Optional: show progress toast or update UI
             },
-            // Bot cycle complete - stopped automatically
+            // Bot cycle complete — one analysis pass finished, more may follow.
+            // Don't assume this means the bot stopped. getBotStatus() only
+            // returns UI phase (status), not is_running — refreshData() below
+            // pulls the real isRunning flag from /bot-data.
             async (data) => {
-                console.log('⏹ Bot cycle complete:', data);
-                // Update bot status to stopped immediately
-                setBotData(prev => ({ ...prev, isRunning: false }));
-                setGlobalBotStatus('STOPPED');
-                
-                // Force refresh bot data from backend to ensure UI is in sync
+                console.log('🔁 Analysis cycle complete:', data);
+
                 try {
-                    await refreshData();
+                    const res = await hftApiService.getBotStatus();
+                    setGlobalBotStatus(res.status);
+                } catch (err) {
+                    console.error('Error fetching bot status after cycle complete:', err);
+                }
+
+                try {
+                    await refreshData(); // this updates isRunning via getBotData()
                 } catch (err) {
                     console.error('Error refreshing data after cycle complete:', err);
                 }
-                
-                // Show success notification
-                toast.success(data.message || 'One cycle completed! Bot stopped.', {
-                    duration: 8000,
-                    icon: '✅'
+
+                toast.success(data.message || 'Analysis cycle complete', {
+                    duration: 4000,
+                    icon: '🔁'
                 });
-                
-                console.log('✅ Bot cycle complete notification shown');
             },
         );
 
-        // Fallback polling every 60 s (much less aggressive now that SSE handles live updates)
         const interval = setInterval(refreshData, 60000);
         return () => {
             stopStream();

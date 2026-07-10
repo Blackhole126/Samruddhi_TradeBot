@@ -7407,30 +7407,59 @@ async def stop_bot(payload: dict = Depends(get_optional_user)):
         state = get_user_state(username)
         bot = state.get("trading_bot")
 
-        # 1. Cancel tasks and clear user-specific flags
-        _stop_continuous_loop(username)
+        # 1. Flip every stop flag FIRST, synchronously — this is what
+        #    /bot-data and /api/status read, so the UI reflects "stopped"
+        #    immediately regardless of how long teardown takes.
         state["bot_running"] = False
+        if bot and hasattr(bot, "bot_running"):
+            bot.bot_running = False
+        if bot and hasattr(bot, "is_running"):
+            bot.is_running = False
 
-        # 2. Stop the bot instance if it exists
-        if bot:
-            if hasattr(bot, 'bot_running'):
-                bot.bot_running = False
+        # 2. Cancel the continuous loop task and WAIT for it, instead of
+        #    firing task.cancel() and hoping. If the loop is mid-way through
+        #    a long synchronous call (e.g. ML training with no await points),
+        #    cancellation can't preempt it — this tells us so explicitly
+        #    instead of silently reporting "stopped" while it keeps running.
+        task = state.get("_continuous_loop_task")
+        _stop_continuous_loop(username)
+
+        if task and not task.done():
             try:
-                loop = asyncio.get_event_loop()
-                await asyncio.wait_for(
-                    loop.run_in_executor(None, bot.stop),
-                    timeout=15.0
+                await asyncio.wait_for(task, timeout=5.0)
+            except asyncio.CancelledError:
+                pass  # expected — loop exited cleanly via cancellation
+            except asyncio.TimeoutError:
+                logger.warning(
+                    f"⚠️ Continuous loop for {username} did not exit within 5s "
+                    f"of cancellation — it's almost certainly blocked inside a "
+                    f"synchronous call (e.g. ML training) that can't be "
+                    f"preempted. It will keep running until that call returns."
                 )
             except Exception as e:
-                logger.warning(f"Error calling bot.stop() for {username}: {e}")
+                logger.warning(f"Loop task ended with error for {username}: {e}")
 
-        logger.info(f"[STOP] Bot stopped for {username}")
+        # 3. Run the heavier bot.stop() teardown (Dhan calls, thread joins,
+        #    ML/learning engine shutdown) in the background so the HTTP
+        #    response isn't held hostage by it. is_running is already False
+        #    from step 1, so the frontend is correct the instant this returns.
+        if bot:
+            async def _background_stop():
+                try:
+                    loop = asyncio.get_event_loop()
+                    await asyncio.wait_for(
+                        loop.run_in_executor(None, bot.stop), timeout=30.0
+                    )
+                except Exception as e:
+                    logger.warning(f"Background bot.stop() issue for {username}: {e}")
+            asyncio.create_task(_background_stop())
+
+        logger.info(f"[STOP] Bot stop requested for {username}")
         return MessageResponse(message="Bot stopped successfully")
     except Exception as e:
         logger.error(
             f"Error stopping bot for {payload.get('sub') if payload else 'unknown'}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
 
 @app.post("/api/bot/start", response_model=MessageResponse)
 async def start_bot_bot_route(payload: dict = Depends(get_optional_user)):

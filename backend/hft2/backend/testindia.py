@@ -3315,12 +3315,21 @@ class Stock:
                 # Generate P&L summary for paper trading every cycle
                 if self.portfolio.mode == "paper":
                     self.portfolio.generate_paper_pnl_summary()
+                
+                def _responsive_sleep(self, seconds):
+                    for _ in range(int(seconds)):
+                        if not self.bot_running:
+                            return False
+                        time.sleep(1)
+                    return True
 
-                time.sleep(self.config.get("sleep_interval", 300))
+                if not self._responsive_sleep(self.config.get("sleep_interval", 300)):
+                    break
             except Exception as e:
                 logger.error(f"Error in main loop: {e}")
                 # Add longer delay on error to prevent excessive logging
-                time.sleep(120)
+                if not self._responsive_sleep(120):
+                    break
 
         # Stop real-time monitoring when bot stops
         self.stop_real_time_monitoring()
@@ -4484,17 +4493,19 @@ class Stock:
             best_transformer_loss = float('inf')
             patience = 20
             patience_counter = 0
-
+            
+            if not bot_running():
+                return {"success": False, "message": "stopped"}
             logger.info(
                 "Starting adversarial training for LSTM and Transformer...")
-            _br = (lambda: bot_running() if callable(bot_running) else bot_running) if callable(
-                bot_running) else (lambda: bot_running)
+           
             for epoch in range(num_epochs):
-                # Check if bot should stop
-                if not _br():
+                if not bot_running():
                     logger.info(
                         "Bot stop signal received, stopping adversarial training epoch loop...")
                     break
+                # Check if bot should stop
+               
 
                 lstm_model.train()
                 transformer_model.train()
@@ -4503,7 +4514,7 @@ class Stock:
 
                 for batch_idx, (inputs, labels) in enumerate(train_loader):
                     # Check if bot should stop during batch processing - INDUSTRY LEVEL IMMEDIATE STOP
-                    if not _br():
+                    if not bot_running():
                         logger.info(
                             f"Bot stop signal received, stopping batch processing at batch {batch_idx}...")
                         break
@@ -4574,7 +4585,7 @@ class Stock:
                     transformer_running_loss += transformer_total_loss.item()
 
                 # Break out of epoch loop if bot should stop
-                if not _br():
+                if not bot_running():
                     break
 
                 # INDUSTRY LEVEL: Calculate epoch losses and update schedulers
@@ -4597,7 +4608,7 @@ class Stock:
                     patience_counter += 1
 
                 # Check if bot should stop after epoch (before logging)
-                if not _br():
+                if not bot_running():
                     logger.info(
                         f"[STOP] Bot stop signal received, stopping ML training after epoch {epoch+1}...")
                     break
@@ -5532,6 +5543,8 @@ class Stock:
                             if not _br():
                                 return {"success": False, "message": "Bot stopped during analysis"}
                             try:
+                                if not bot_running():
+                                    return {"success": False, "message": "stopped"}
                                 logger.info("Training XGBoost model...")
                                 xgb_model = ml_libraries_available['xgb'].XGBRegressor(
                                     n_estimators=50,
@@ -5556,6 +5569,8 @@ class Stock:
                             if not _br():
                                 return {"success": False, "message": "Bot stopped during analysis"}
                             try:
+                                if not bot_running():
+                                    return {"success": False, "message": "stopped"}
                                 logger.info("Training LightGBM model...")
                                 lgb_model = ml_libraries_available['lgb'].LGBMRegressor(
                                     n_estimators=50,
@@ -5605,6 +5620,8 @@ class Stock:
                             if not _br():
                                 return {"success": False, "message": "Bot stopped during analysis"}
                             try:
+                                if not bot_running():
+                                    return {"success": False, "message": "stopped"}
                                 logger.info("Training Extra Trees model...")
                                 et_model = ExtraTreesRegressor(
                                     n_estimators=50,
@@ -5627,6 +5644,8 @@ class Stock:
                             if not _br():
                                 return {"success": False, "message": "Bot stopped during analysis"}
                             try:
+                                if not bot_running():
+                                    return {"success": False, "message": "stopped"}
                                 logger.info("Training SVR model...")
                                 svr_model = SVR(
                                     kernel='rbf',
@@ -5647,6 +5666,8 @@ class Stock:
                             if not _br():
                                 return {"success": False, "message": "Bot stopped during analysis"}
                             try:
+                                if not bot_running():
+                                    return {"success": False, "message": "stopped"}
                                 logger.info("Training MLP Neural Network...")
                                 mlp_model = MLPRegressor(
                                     hidden_layer_sizes=(256, 128, 64),
@@ -8893,18 +8914,16 @@ class StockTradingBot:
         logger.info("Starting Stock Trading Bot for Indian market...")
         self.bot_running = True
 
-        # Perform one-time check for stop loss and take profit at startup
         self.start_real_time_monitoring()
 
         while self.bot_running:
             try:
-                # Periodic check for stop loss and take profit conditions for all holdings
+                # Periodic check for stop loss and take profit conditions
                 self._check_stop_loss_take_profit_once()
 
                 # Check if bot should stop
                 if not self.bot_running:
-                    logger.info(
-                        "Bot stop signal received, exiting main loop...")
+                    logger.info("Bot stop signal received, exiting main loop...")
                     break
 
                 # Check if trading is paused
@@ -8912,90 +8931,67 @@ class StockTradingBot:
                     if self.chatbot.pause_until and datetime.now() >= self.chatbot.pause_until:
                         self.chatbot.trading_paused = False
                         self.chatbot.pause_until = None
-                        self.chatbot.save_state = None
-                        logger.info(
-                            "Trading pause expired, resuming trading...")
+                        logger.info("Trading pause expired, resuming trading...")
                     else:
                         logger.info("Trading is paused, waiting...")
-                        # Wait 1 minute responsively
                         if not self._responsive_sleep(60):
                             break
                         continue
 
-                # if not self.is_market_open():
-                #     logger.info("NSE market is closed, waiting...")
-                #     if not self._responsive_sleep(300):  # Wait 5 minutes responsively
-                #         break
-                #     continue
-
-                logger.info(
-                    "Logging portfolio metrics at start of trading cycle...")
+                logger.info("Logging portfolio metrics at start of trading cycle...")
                 self.tracker.log_metrics()
 
                 for ticker in self.config["tickers"]:
                     try:
-                        # Check if bot should stop before processing each ticker
                         if not self.bot_running:
-                            logger.info(
-                                "Bot stop signal received, stopping ticker processing...")
+                            logger.info("Bot stop signal received, stopping ticker processing...")
                             break
 
-                        # Skip invalid ticker formats
                         if ticker.startswith('$'):
-                            logger.warning(
-                                f"Skipping invalid ticker format: {ticker}")
+                            logger.warning(f"Skipping invalid ticker format: {ticker}")
                             continue
 
                         analysis = self.run_analysis(ticker)
                         if analysis.get("success"):
-                            save_result = self.stock_analyzer.save_analysis_to_files(
-                                analysis)
+                            save_result = self.stock_analyzer.save_analysis_to_files(analysis)
                             if save_result.get("success"):
-                                logger.info(
-                                    f"Saved analysis files: {save_result}")
+                                logger.info(f"Saved analysis files: {save_result}")
                             else:
-                                logger.warning(
-                                    f"Failed to save analysis: {save_result.get('message')}")
+                                logger.warning(f"Failed to save analysis: {save_result.get('message')}")
                             trade = self.make_trading_decision(analysis)
                             if trade and trade["success"]:
                                 logger.info(f"Trade executed: {trade}")
                         else:
-                            logger.warning(
-                                f"Analysis failed for {ticker}: {analysis.get('message')}")
+                            logger.warning(f"Analysis failed for {ticker}: {analysis.get('message')}")
 
                     except Exception as e:
                         logger.error(f"Error processing ticker {ticker}: {e}")
-                        # Continue with next ticker instead of crashing
                         continue
 
-                # Check if bot should stop before generating report
                 if not self.bot_running:
-                    logger.info(
-                        "Bot stop signal received, skipping report generation...")
+                    logger.info("Bot stop signal received, skipping report generation...")
                     break
 
                 report = self.reporter.generate_report()
                 logger.info(f"Daily Report: {report}")
 
-                logger.info(
-                    "Logging portfolio metrics at end of trading cycle...")
+                logger.info("Logging portfolio metrics at end of trading cycle...")
                 self.tracker.log_metrics()
 
-                # Generate P&L summary for paper trading every cycle
                 if self.portfolio.mode == "paper":
                     self.portfolio.generate_paper_pnl_summary()
 
+                # ← sleep goes HERE, at the end of the cycle, not the start
                 if not self._responsive_sleep(self.config.get("sleep_interval", 300)):
                     break
+
             except Exception as e:
                 logger.error(f"Error in main loop: {e}")
-                # Add longer delay on error to prevent excessive logging
                 if not self._responsive_sleep(120):
                     break
 
-        # Stop real-time monitoring when bot stops
         self.stop_real_time_monitoring()
-        logger.info("Stock Trading Bot stopped successfully")
+        logger.info("Stock Trading Bot stopped")
 
     def start(self):
         """Start the trading bot (non-blocking). Sets bot_running flag and starts monitoring.
