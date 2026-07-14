@@ -24,6 +24,23 @@ const api: AxiosInstance = axios.create({
     },
 });
 
+const normalizeTradeAction = (value: unknown): 'BUY' | 'SELL' | 'HOLD' | null => {
+    const raw = String(value ?? '').trim().toUpperCase();
+    if (!raw) return null;
+    if ((raw.includes('BUY') || raw === 'LONG') && !raw.includes('SELL')) return 'BUY';
+    if ((raw.includes('SELL') || raw === 'SHORT') && !raw.includes('BUY')) return 'SELL';
+    if (raw.includes('HOLD') || raw.includes('NEUTRAL') || raw.includes('WAIT')) return 'HOLD';
+    return null;
+};
+
+const pickTradeAction = (...values: unknown[]): 'BUY' | 'SELL' | 'HOLD' | null => {
+    for (const value of values) {
+        const action = normalizeTradeAction(value);
+        if (action) return action;
+    }
+    return null;
+};
+
 // Request interceptor: attach auth token (so watchlist and bot start are per-user)
 api.interceptors.request.use(
     (config) => {
@@ -389,19 +406,38 @@ export const hftApiService = {
             // This file is written immediately after RL analysis in testindia.py
             // and contains the EXACT BUY/SELL/HOLD that appears in the terminal output.
             if (result?.status === 'ready' && result?.data) {
+                const baseAction = pickTradeAction(
+                    result.data.recommendation,
+                    result.data.action,
+                    result.data.signal,
+                    result.data.predicted_action,
+                    result.data.ml_analysis?.rl_recommendation,
+                    result.data.ml_analysis?.rl_metrics?.recommendation
+                );
+                if (baseAction) {
+                    result.data.recommendation = baseAction;
+                }
+
                 try {
                     const sigResp = await api.get(`/trade-signal?symbol=${encodeURIComponent(symbol)}`, {
                         timeout: 5000,
                     });
                     const sig = sigResp.data;
-                    if (sig?.success && sig?.action && ['BUY', 'SELL', 'HOLD'].includes(sig.action)) {
+                    const signalAction = pickTradeAction(
+                        sig?.action,
+                        sig?.recommendation,
+                        sig?.signal,
+                        sig?.rl_recommendation,
+                        sig?.predicted_action
+                    );
+                    if (sig?.success && signalAction) {
                         // Directly override the recommendation and reasoning in the result data
-                        result.data.recommendation = sig.action;
+                        result.data.recommendation = signalAction;
                         if (sig.confidence_score !== undefined && sig.confidence_score >= 0 && sig.confidence_score <= 1) {
                             result.data.confidence = sig.confidence_score;
                         }
                         if (sig.reasoning) {
-                            result.data.reasoning = `[RL: ${sig.rl_recommendation ?? sig.action}] ${sig.reasoning}`;
+                            result.data.reasoning = `[RL: ${sig.rl_recommendation ?? signalAction}] ${sig.reasoning}`;
                         }
                         if (sig.stop_loss && sig.stop_loss > 0) {
                             result.data.stop_loss = sig.stop_loss;
@@ -409,7 +445,7 @@ export const hftApiService = {
                         if (sig.take_profit && sig.take_profit > 0) {
                             result.data.target_price = sig.take_profit;
                         }
-                        console.log(`[HFT API] Professional signal loaded for ${symbol}: ${sig.action} (RL: ${sig.rl_recommendation})`);
+                        console.log(`[HFT API] Professional signal loaded for ${symbol}: ${signalAction} (RL: ${sig.rl_recommendation})`);
                     }
                 } catch (_sigErr) {
                     // Signal file not yet available — use the base analysis result as-is

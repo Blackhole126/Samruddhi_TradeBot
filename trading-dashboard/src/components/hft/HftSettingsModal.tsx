@@ -70,6 +70,11 @@ const HftSettingsModal: React.FC<HftSettingsModalProps> = ({ settings, onSave, o
 
     useEffect(() => {
         let cancelled = false;
+        if (formData.mode !== 'live') {
+            setDhanConfigured(null);
+            setDhanError(null);
+            return () => { cancelled = true; };
+        }
         hftApiService.getLiveStatus()
             .then((res) => {
                 if (!cancelled) {
@@ -79,9 +84,19 @@ const HftSettingsModal: React.FC<HftSettingsModalProps> = ({ settings, onSave, o
             })
             .catch(() => { if (!cancelled) { setDhanConfigured(false); setDhanError(null); } });
         return () => { cancelled = true; };
-    }, []);
+    }, [formData.mode]);
 
     useEffect(() => {
+        if (formData.mode !== 'live') {
+            setDematLinked(false);
+            setDematBroker('');
+            setDematMaskedId(null);
+            setDematError(null);
+            setDematSuccess(null);
+            setShowDematLinkForm(false);
+            setShowDematRefreshForm(false);
+            return;
+        }
         if (!user?.username) {
             setDematLinked(false);
             setDematBroker('');
@@ -99,7 +114,7 @@ const HftSettingsModal: React.FC<HftSettingsModalProps> = ({ settings, onSave, o
             })
             .catch(() => { if (!cancelled) { setDematLinked(false); setDematBroker(''); setDematMaskedId(null); } });
         return () => { cancelled = true; };
-    }, [user?.username]);
+    }, [formData.mode, user?.username]);
 
     const handleInputChange = (field: keyof SettingsFormData, value: any) => {
         setFormData(prev => {

@@ -1438,7 +1438,7 @@ def _build_sse_snapshot(username: str = "anonymous") -> dict:
                 )
                 total_value = cash + market_val
             return {
-                "isRunning": bot_data.get("isRunning", False) or initializing,
+                "isRunning": running or initializing,
                 "cash": cash,
                 "totalValue": round(total_value, 2),
                 "unrealizedPnL": portfolio.get("unrealizedPnL", 0),
@@ -5633,6 +5633,10 @@ async def get_trade_signal(symbol: str = "INFY.NS", payload: dict = Depends(get_
         # User-specific path if authenticated
         username = payload.get(
             "sub") or "anonymous" if payload else "anonymous"
+        global_signal_path = os.path.join(
+            os.path.dirname(__file__), "stock_analysis",
+            f"{sanitized}_signal.json"
+        )
         if username and username != "anonymous":
             current_dir = os.path.dirname(os.path.abspath(__file__))
             project_root = os.path.dirname(current_dir)
@@ -5642,10 +5646,9 @@ async def get_trade_signal(symbol: str = "INFY.NS", payload: dict = Depends(get_
                 user_data_dir, "stock_analysis", f"{sanitized}_signal.json")
         else:
             # Global fallback
-            signal_path = os.path.join(
-                os.path.dirname(__file__), "stock_analysis",
-                f"{sanitized}_signal.json"
-            )
+            signal_path = global_signal_path
+        if not os.path.exists(signal_path) and signal_path != global_signal_path:
+            signal_path = global_signal_path
         if not os.path.exists(signal_path):
             return {"success": False, "message": f"No signal file found for {sym}. Bot may not have evaluated this ticker yet."}
         file_age_seconds = time.time() - os.path.getmtime(signal_path)
@@ -7518,7 +7521,7 @@ async def get_settings(user_demat: tuple = Depends(get_optional_user_demat)):
     }
 
 
-@app.post("/api/settings", response_model=MessageResponse)
+@app.post("/api/settings")
 async def update_settings(request: SettingsRequest, user_demat: tuple = Depends(get_optional_user_demat)):
     """Update bot settings. Supports paper/live mode."""
     payload, request_user_demat = user_demat if isinstance(user_demat, tuple) else (None, None)
@@ -7544,6 +7547,12 @@ async def update_settings(request: SettingsRequest, user_demat: tuple = Depends(
                         actual_mode = str(trading_bot.config.get("mode", "paper")).strip().lower()
                         save_config_to_file(actual_mode, trading_bot.config, username)
                         set_current_saved_mode(actual_mode, username)
+                        if new_mode == "live" and actual_mode != "live":
+                            return {
+                                "message": "Live mode requires a linked Dhan account. Reverted to paper mode.",
+                                "mode": "paper",
+                                "reverted": True,
+                            }
                     else:
                         raise HTTPException(status_code=400, detail=f"Failed to switch to {new_mode} mode")
 
@@ -7552,11 +7561,19 @@ async def update_settings(request: SettingsRequest, user_demat: tuple = Depends(
             save_config_to_file(current_mode, trading_bot.config, username)
             set_current_saved_mode(current_mode, username)
 
-            return MessageResponse(message="Settings updated successfully")
+            return {"message": "Settings updated successfully", "mode": current_mode, "reverted": False}
 
         mode = (request.mode or get_current_saved_mode(username) or "paper").strip().lower()
         if mode not in {"paper", "live"}:
             mode = "paper"
+        reverted = False
+        if mode == "live" and not (
+            request_user_demat
+            and request_user_demat.get("access_token")
+            and request_user_demat.get("client_id")
+        ):
+            mode = "paper"
+            reverted = True
 
         config_to_save = {
             "mode": mode,
@@ -7572,7 +7589,13 @@ async def update_settings(request: SettingsRequest, user_demat: tuple = Depends(
         save_config_to_file(mode, config_to_save, username)
         set_current_saved_mode(mode, username)
 
-        return MessageResponse(message=f"Settings saved successfully. Mode: {mode}")
+        if reverted:
+            return {
+                "message": "Live mode requires a linked Dhan account. Saved paper mode instead.",
+                "mode": "paper",
+                "reverted": True,
+            }
+        return {"message": f"Settings saved successfully. Mode: {mode}", "mode": mode, "reverted": False}
     
 
     except Exception as e:

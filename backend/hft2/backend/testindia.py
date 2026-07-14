@@ -1008,14 +1008,31 @@ class DataFeed:
     def __init__(self, tickers):
         self.tickers = tickers
 
+    def _normalize_legacy_ticker(self, ticker: str) -> str:
+        """Normalize legacy ticker symbols to exchange-specific formats."""
+        t = (ticker or "").strip().upper()
+
+        # Legacy mapping fixes:
+        # SBINS -> SBIN.NS
+        if t == "SBINS":
+            return "SBIN.NS"
+        # NSEINS / ^NSEINS -> ^NSEI
+        if t in {"NSEINS", "^NSEINS", "^NSEI", "^NSEINS"}:
+            # Keep caret for indices in yfinance-style "^NSEI"
+            return "^NSEI"
+
+        return ticker
+
     def get_live_prices(self):
         """Fetch live prices for specified tickers using yfinance."""
         data = {}
         for ticker in self.tickers:
             try:
+                ticker = self._normalize_legacy_ticker(ticker)
+
                 # Add .NS suffix if ticker doesn't have an exchange suffix
                 formatted_ticker = ticker
-                if '.' not in ticker and not ticker.isdigit():
+                if '.' not in ticker and not ticker.isdigit() and ticker != '^NSEI':
                     formatted_ticker = ticker + '.NS'
                     logger.debug(
                         f"Auto-formatted ticker {ticker} to {formatted_ticker} in DataFeed")
@@ -1071,6 +1088,22 @@ class VirtualPortfolio:
         self.realized_pnl = 0  # P&L from completed trades
         self.unrealized_pnl = 0  # P&L from current holdings
         self.trade_callbacks = []  # Callbacks to notify when trades are executed
+
+        # PAPER TRADING LOGS (robust init):
+        # Some code paths call paper log writers before initialize_files() completes.
+        # Ensure attribute always exists.
+        import os
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(current_dir)
+        data_dir = os.path.join(project_root, "data", "users", self.username)
+        os.makedirs(data_dir, exist_ok=True)
+        backend_dir = __import__("pathlib").Path(__file__).resolve().parent
+        project_root = backend_dir.parent
+        logs_dir = project_root / "logs"
+        os.makedirs(str(logs_dir), exist_ok=True)
+        self.paper_trade_log = os.path.join(
+            str(logs_dir), f"paper_trade_log_{self.mode}.txt"
+        )
 
         # Debug logging for received config
         import logging
@@ -1230,6 +1263,12 @@ class VirtualPortfolio:
         backend_dir = Path(__file__).resolve().parent
         project_root = backend_dir.parent
         logs_dir = project_root / 'logs'
+        os.makedirs(logs_dir, exist_ok=True)
+
+        # If already initialized in __init__, preserve it; otherwise set it here.
+        if not getattr(self, "paper_trade_log", None):
+            self.paper_trade_log = os.path.join(
+                logs_dir, f"paper_trade_log_{self.mode}.txt")
 
         # Only create portfolio file if it doesn't exist - preserve existing data
         if not os.path.exists(self.portfolio_file):
@@ -1292,7 +1331,8 @@ class VirtualPortfolio:
                     order_type="MARKET",
                     quantity=qty,
                     price=0,  # Market order uses 0 for price
-                    validity="DAY"
+                    validity="DAY",
+                    product_type="CNC"
                 )
                 logger.info(
                     f"✅ LIVE ORDER PLACED: BUY {qty} {asset} @ Rs.{price} | Result: {order_result}")
@@ -1367,7 +1407,8 @@ class VirtualPortfolio:
                     order_type="MARKET",
                     quantity=qty,
                     price=0,  # Market order uses 0 for price
-                    validity="DAY"
+                    validity="DAY",
+                    product_type="CNC"
                 )
                 logger.info(
                     f"✅ LIVE ORDER PLACED: SELL {qty} {asset} @ Rs.{price} | Result: {order_result}")
@@ -1554,6 +1595,11 @@ class VirtualPortfolio:
     def log_paper_trade_details(self, trade):
         """Log detailed paper trade information for Phase 2 objectives."""
         try:
+            # Ensure paper_trade_log exists (avoid AttributeError in rare init races)
+            if not getattr(self, "paper_trade_log", None):
+                self.paper_trade_log = os.path.join(
+                    "logs", f"paper_trade_log_{self.mode}.txt"
+                )
             timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             action = trade["action"].upper()
             asset = trade["asset"]
@@ -1594,6 +1640,13 @@ class VirtualPortfolio:
         """Log strategy trigger explanations for paper trading."""
         if self.mode != "paper":
             return
+
+        # Ensure paper_trade_log exists (avoid AttributeError)
+        if not getattr(self, "paper_trade_log", None):
+            import os
+            self.paper_trade_log = os.path.join(
+                "logs", f"paper_trade_log_{self.mode}.txt"
+            )
 
         try:
             timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -1661,6 +1714,13 @@ class VirtualPortfolio:
         """Generate comprehensive P&L summary for paper trading."""
         if self.mode != "paper":
             return
+
+        # Ensure paper_trade_log exists (avoid AttributeError)
+        if not getattr(self, "paper_trade_log", None):
+            import os
+            self.paper_trade_log = os.path.join(
+                "logs", f"paper_trade_log_{self.mode}.txt"
+            )
 
         try:
             timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -1954,7 +2014,8 @@ class TradingExecutor:
                         order_type="MARKET",
                         quantity=int(qty),
                         price=0,  # Market order
-                        validity="DAY"
+                        validity="DAY",
+                        product_type="CNC"
                     )
                     logger.info(
                         f"Legacy live trade executed: {action} {qty} units of {ticker} at Rs.{price}")
@@ -6783,9 +6844,22 @@ class StockTradingBot:
                 technical_quality = (
                     rsi_quality + macd_quality + adx_quality) / 3.0
 
-            # ML confidence adjustment
-            ml_confidence = ml_analysis.get(
-                "confidence", 0.5) if ml_analysis.get("success", False) else 0.3
+            # ML confidence adjustment:
+            # If ML category/confidence is missing, do NOT hard-fallback to a constant.
+            # Instead, average from available signals to avoid bias (confidence averaging).
+            ml_confidence_raw = ml_analysis.get("confidence")
+            ml_confidence = None
+            if isinstance(ml_confidence_raw, (int, float)):
+                ml_confidence = float(ml_confidence_raw)
+
+            # When ML is explicitly successful and confidence is present, use it.
+            if ml_analysis.get("success", False) and ml_confidence is not None:
+                pass
+            else:
+                # ML category missing / not successful: average available confidence proxies.
+                # Use a blend of technical signal quality and sentiment confidence.
+                ml_confidence = (technical_quality + sentiment_confidence) / 2.0
+                ml_confidence = float(max(0.0, min(1.0, ml_confidence)))
 
             # Sentiment consistency adjustment
             sentiment_confidence = 0.5

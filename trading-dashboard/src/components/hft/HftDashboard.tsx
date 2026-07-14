@@ -609,6 +609,7 @@ const HftDashboard: React.FC<HftDashboardProps> = ({ botData, botRunKey = 0, onR
                             key={`${ticker}-${botRunKey}`}
                             symbol={ticker}
                             active={botData.isRunning}
+                            botMode={botData.config?.mode}
                             botRunKey={botRunKey}
                         />
                     ))}

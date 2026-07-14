@@ -930,6 +930,7 @@ class DhanAPIClient:
         quantity = int(kwargs.get("quantity", 0))
         order_type = (kwargs.get("order_type") or "MARKET").upper()
         price = kwargs.get("price")
+        product_type = kwargs.get("product_type", "CNC")
 
         if not symbol or quantity <= 0:
             return None
@@ -940,6 +941,7 @@ class DhanAPIClient:
             quantity=quantity,
             order_type=order_type,
             price=float(price) if price is not None else 0.0,
+            product_type=product_type,
             access_token=self.access_token,
             client_id=self.client_id,
         )

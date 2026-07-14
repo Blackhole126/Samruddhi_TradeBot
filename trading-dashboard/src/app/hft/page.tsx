@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
+
 import Layout from '@/components/Layout';
 import { useTheme } from '@/contexts/ThemeContext';
 import HftDashboard from '@/components/hft/HftDashboard';
@@ -10,8 +11,10 @@ import HftLoadingOverlay from '@/components/hft/HftLoadingOverlay';
 import HftSettingsModal from '@/components/hft/HftSettingsModal';
 import { hftApiService, formatCurrency, formatPercentage, createBotStream } from '@/services/hftApiService';
 import { userAPI } from '@/services/api';
-import type { HftBotData, HftChatMessage, HftTradingMode } from '@/types/hft';
+import type { HftBotData, HftTradingMode } from '@/types/hft';
+
 import { CheckCircle2, AlertCircle, RefreshCw, Play, Square, LayoutDashboard, Briefcase, MessageCircle, Loader2 } from 'lucide-react';
+
 
 export default function HftPage() {
     const { theme } = useTheme();
@@ -44,29 +47,42 @@ export default function HftPage() {
     const [botRunKey, setBotRunKey] = useState(0);
     const [globalBotStatus, setGlobalBotStatus] = useState<'IDLE' | 'INITIALIZING' | 'READY' | 'ERROR' | 'STOPPED'>('IDLE');
 
-    // Poll for bot status separately — only every 30 s while analysis is running
-    // so we don't flood the busy event loop with 120 s-timeout requests.
-    useEffect(() => {
-        let consecutiveFailures = 0;
+    const botStatusSeqRef = useRef(0);
+    const fastPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const actionInFlightRef = useRef(false);
 
-        const checkStatus = async () => {
-            try {
-                const res = await hftApiService.getBotStatus();
-                setGlobalBotStatus(res.status);
-                consecutiveFailures = 0;
-            } catch (e) {
+    // ADD THIS BLOCK HERE — new debug logger
+    useEffect(() => {
+        console.log('[STATE]', { isRunning: botData.isRunning, globalBotStatus, loading });
+    }, [botData.isRunning, globalBotStatus, loading]);
+
+    // Poll for bot status separately. Guard against overlapping/stale responses.
+    useEffect(() => {
+    let consecutiveFailures = 0;
+
+    const checkStatus = async () => {
+        if (fastPollRef.current) return; // NEW: fast-poll owns status right after Start
+        const seq = ++botStatusSeqRef.current;
+        try {
+            const res = await hftApiService.getBotStatus();
+            if (seq !== botStatusSeqRef.current) return; // ignore stale
+            setGlobalBotStatus(res.status);
+            setBotData(prev => ({ ...prev, isRunning: res.status !== 'STOPPED' }));
+            consecutiveFailures = 0;
+        } catch {
+            if (seq !== botStatusSeqRef.current) return; // ignore stale
             consecutiveFailures++;
-            // After 3 failed checks in a row, don't leave the user stuck —
-            // assume the bot is actually fine and stop blocking the UI.
             if (consecutiveFailures >= 3) {
-                setGlobalBotStatus(prev => prev === 'INITIALIZING' ? 'READY' : prev);
+                setGlobalBotStatus(prev => (prev === 'INITIALIZING' ? 'READY' : prev));
             }
         }
     };
-    checkStatus();
-    const interval = setInterval(checkStatus, 30000); // 30 s
-    return () => clearInterval(interval);
-}, []);
+
+        checkStatus();
+        const interval = setInterval(checkStatus, 30000); // 30 s
+        return () => clearInterval(interval);
+    }, []);
+
 
     // SSE stream: connect once and keep alive; also do an initial REST load
     useEffect(() => {
@@ -96,7 +112,7 @@ export default function HftPage() {
 
                     return {
                         ...prev,
-                        isRunning: payload.isRunning ?? prev.isRunning,
+                        isRunning: prev.isRunning,
                         portfolio: {
                             ...prev.portfolio,
                             cash: rawCash,
@@ -163,8 +179,6 @@ export default function HftPage() {
         try {
             setLoading(true);
             await loadDataFromBackend();
-            await loadLiveStatus();
-            setConnected(true);
             setConnected(true);
         } catch (error) {
             console.error('Error initializing app:', error);
@@ -175,49 +189,53 @@ export default function HftPage() {
         }
     };
 
-    const loadDataFromBackend = async () => {
-        try {
-            const data = await hftApiService.getBotData();
-            // Ensure mode is properly set from backend response
-            const backendMode: HftTradingMode = data?.config?.mode === 'live' ? 'live' : 'paper';
-            // Also fetch watchlist directly to ensure we have the latest
-            let watchlistTickers: string[] = [];
-            try {
-                watchlistTickers = await hftApiService.getWatchlist();
-            } catch (watchlistErr) {
-                // Fallback to tickers from bot data if watchlist endpoint fails
-                watchlistTickers = data?.config?.tickers || [];
-            }
-            setBotData(prev => ({
-                ...prev,
-                ...data,
-                config: {
-                    ...prev.config,
-                    ...data.config,
-                    mode: backendMode,  // Use mode from backend
-                    tickers: watchlistTickers  // Use watchlist from dedicated endpoint
-                }
-            }));
-            setConnected(true);
-            // Update live status based on mode
-            if (backendMode === 'live') {
-                await loadLiveStatus();
-            }
-        } catch (error: any) {
-            // A timeout means the backend is slow/busy with ML analysis — NOT offline.
-            // Only mark offline for true network connection failures.
-            const isTimeout = error?.message?.includes('timeout') || error?.code === 'ECONNABORTED';
-            const isNetworkError = error?.message === 'Network Error' || error?.code === 'ERR_NETWORK';
-            if (isNetworkError && !botData.isRunning) {
-                // Only mark offline for true connection failures AND only when bot is NOT running
-                // (during ML analysis, even network stack can hiccup — don't show System Offline)
-                setConnected(false);
-            }
-            // Silently keep last known state for timeouts or when bot is running
-        }
-    };
+    const botDataSeqRef = useRef(0);
 
-    const loadLiveStatus = async () => {
+    const loadDataFromBackend = async () => {
+    const seq = ++botDataSeqRef.current;
+    try {
+        const data = await hftApiService.getBotData();
+        if (seq !== botDataSeqRef.current) return; // NEW: discard stale response
+
+        const backendMode: HftTradingMode = data?.config?.mode === 'live' ? 'live' : 'paper';
+        let watchlistTickers: string[] = [];
+        try {
+            watchlistTickers = await hftApiService.getWatchlist();
+        } catch (watchlistErr) {
+            watchlistTickers = data?.config?.tickers || [];
+        }
+        if (seq !== botDataSeqRef.current) return; // NEW: re-check after the second await
+
+        setBotData(prev => ({
+            ...prev,
+            ...data,
+            isRunning: typeof data?.isRunning === 'boolean' ? data.isRunning : prev.isRunning,
+            config: {
+                ...prev.config,
+                ...data.config,
+                mode: backendMode,
+                tickers: watchlistTickers
+            }
+        }));
+        setConnected(true);
+        if (backendMode === 'live') {
+            await loadLiveStatus();
+        }
+    } catch (error: any) {
+        if (seq !== botDataSeqRef.current) return; // NEW: discard stale errors too
+        const isTimeout = error?.message?.includes('timeout') || error?.code === 'ECONNABORTED';
+        const isNetworkError = error?.message === 'Network Error' || error?.code === 'ERR_NETWORK';
+        if (isNetworkError && !botData.isRunning) {
+            setConnected(false);
+        }
+    }
+};
+
+    const loadLiveStatus = async (mode: HftTradingMode = tradingMode) => {
+        if (mode !== 'live') {
+            setLiveStatus(null);
+            return;
+        }
         try {
             const status = await hftApiService.getLiveStatus();
             setLiveStatus(status);
@@ -229,10 +247,14 @@ export default function HftPage() {
     const refreshData = async () => {
         try {
             await loadDataFromBackend();
-            await loadLiveStatus();
-            try {
-                await hftApiService.syncLivePortfolio();
-            } catch { /* optional */ }
+            if (tradingMode === 'live') {
+                await loadLiveStatus('live');
+                try {
+                    await hftApiService.syncLivePortfolio();
+                } catch { /* optional */ }
+            } else {
+                setLiveStatus(null);
+            }
         } catch (error) {
             console.error('Error refreshing data:', error);
         }
@@ -241,51 +263,74 @@ export default function HftPage() {
 
 
     const handleStartBot = async () => {
-    try {
-        setLoading(true);
-        const userTickers = await userAPI.getWatchlist();
-        if (userTickers.length > 0) {
-            try { await hftApiService.bulkUpdateWatchlist(userTickers, 'ADD'); } catch {}
-        }
-        await hftApiService.startBot();
-        setBotRunKey(k => k + 1);
-        setBotData(prev => ({ ...prev, isRunning: true }));
-        setGlobalBotStatus('INITIALIZING');
-        toast.success('Bot started! Wait for analysis to finish before results appear.');
+if (actionInFlightRef.current) return; // NEW: block double-clicks / double-fire
+actionInFlightRef.current = true;
 
-        // Poll every 4s for up to 60s so INITIALIZING doesn't get stuck on a bad tick
-        let attempts = 0;
-        const fastPoll: ReturnType<typeof setInterval> = setInterval(async () => {
-            attempts++;
-            try {
-                const res = await hftApiService.getBotStatus();
-                setGlobalBotStatus(res.status);
-                if (res.status === 'READY' || attempts >= 15) clearInterval(fastPoll);
-            } catch {
-                if (attempts >= 15) clearInterval(fastPoll);
-            }
-        }, 4000);
-
-        setTimeout(() => refreshData(), 3000);
-    } catch (error) {
-        console.error('Error starting bot:', error);
-        toast.error('Failed to start bot');
-    } finally {
-        setLoading(false);
+try {
+    setLoading(true);
+    const userTickers = await userAPI.getWatchlist();
+    if (userTickers.length > 0) {
+        try { await hftApiService.bulkUpdateWatchlist(userTickers, 'ADD'); } catch {}
     }
-};
+    await hftApiService.startBot();
+    setBotRunKey(k => k + 1);
+    setBotData(prev => ({ ...prev, isRunning: true }));
+    setGlobalBotStatus('INITIALIZING');
+    toast.success('Bot started! Wait for analysis to finish before results appear.');
 
+    if (fastPollRef.current) {                 // NEW: clear any stray previous poller
+        clearInterval(fastPollRef.current);
+        fastPollRef.current = null;
+    }
+
+    // Poll every 4s for up to 60s so INITIALIZING doesn't get stuck on a bad tick
+    let attempts = 0;
+    fastPollRef.current = setInterval(async () => {   // NEW: store in ref, not local var
+        attempts++;
+        const seq = ++botStatusSeqRef.current;          // NEW: share the staleness guard
+        try {
+            const res = await hftApiService.getBotStatus();
+            if (seq !== botStatusSeqRef.current) return;  // NEW: ignore stale response
+            setGlobalBotStatus(res.status);
+            
+            if (res.status === 'READY' || attempts >= 15) {
+                clearInterval(fastPollRef.current!);
+                fastPollRef.current = null;
+                if (attempts >= 15 && res.status !== 'READY') {
+                    setGlobalBotStatus('READY'); // NEW: don't leave button stuck disabled forever
+                }
+            }
+        } catch {
+            if (attempts >= 15) {
+                clearInterval(fastPollRef.current!);
+                fastPollRef.current = null;
+                setGlobalBotStatus('READY'); // NEW: fail-safe so button doesn't stay stuck
+            }
+        }
+    }, 4000);
+
+    setTimeout(() => refreshData(), 3000);
+} catch (error) {
+    console.error('Error starting bot:', error);
+    toast.error('Failed to start bot');
+} finally {
+    setLoading(false);
+    actionInFlightRef.current = false; // NEW: release the guard
+}
+};
     const handleStopBot = async () => {
         try {
             setLoading(true);
             await hftApiService.stopBot();
             setBotData(prev => ({ ...prev, isRunning: false }));
+            setGlobalBotStatus('STOPPED');
             toast.success('Bot stopped successfully!');
             await refreshData();
         } catch (error) {
             console.error('Error stopping bot:', error);
             // Always mark as stopped so UI is not stuck when backend is down or request fails
             setBotData(prev => ({ ...prev, isRunning: false }));
+            setGlobalBotStatus('STOPPED');
             toast.error('Failed to stop bot (backend may be offline)');
         } finally {
             setLoading(false);
@@ -369,11 +414,17 @@ export default function HftPage() {
                 toast.success(result.message || 'Settings saved successfully!');
             }
             setShowSettings(false);
-            // Refresh data multiple times to ensure live mode is reflected
+            const savedMode: HftTradingMode = result.mode === 'live' ? 'live' : 'paper';
+            if (savedMode === 'paper') {
+                setLiveStatus(null);
+            }
+            // Refresh data multiple times to ensure mode is reflected
             await refreshData();
             await new Promise(resolve => setTimeout(resolve, 500)); // Wait 500ms
             await refreshData();
-            await loadLiveStatus(); // Explicitly reload live status
+            if (savedMode === 'live') {
+                await loadLiveStatus('live'); // Explicitly reload live status
+            }
         } catch (error) {
             console.error('Error saving settings:', error);
             toast.error('Failed to save settings');
