@@ -4,17 +4,22 @@ Unified server: vetting agent at /tools/*, HFT Bot at /api/*.
 """
 
 import asyncio
+import json
 import logging
 import os
 import subprocess
 import sys
+import sqlite3
+import threading
 from pathlib import Path
 from typing import Optional, List, Any
-from datetime import datetime, timedelta
+from datetime import datetime
 import random
 
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
+
+from config import DATA_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +28,10 @@ hft_router = APIRouter()
 # When Start Bot is used without HFT2_BACKEND_URL, optionally start hft2 processes (web_backend, fyers) so logs show in Render.
 _hft2_processes: List[subprocess.Popen] = []
 _hft2_stream_threads: List[Any] = []  # keep refs so threads don't get GC'd
+_paper_auto_task: Optional[asyncio.Task] = None
+PAPER_STARTING_BALANCE = 100000.0
+PAPER_DB_PATH = DATA_DIR / "hft_paper_portfolio.db"
+_paper_lock = threading.RLock()
 # HFT2_BACKEND_DIR: optional env override on Render. If relative, resolved from backend dir (not cwd).
 _backend_dir = (Path(__file__).resolve().parent.parent)  # .../backend
 _default_hft2_dir = (_backend_dir / "hft2" / "backend").resolve()
@@ -73,7 +82,253 @@ class OrderRequest(BaseModel):
     price: Optional[float] = None
 
 
-# ---------- In-memory state (unified with main backend; no second process) ----------
+def _default_paper_portfolio() -> dict:
+    now = datetime.now().isoformat()
+    return {
+        "totalValue": PAPER_STARTING_BALANCE,
+        "cash": PAPER_STARTING_BALANCE,
+        "startingBalance": PAPER_STARTING_BALANCE,
+        "holdings": {},
+        "tradeLog": [],
+        "realizedPnL": 0.0,
+        "unrealizedPnL": 0.0,
+        "investedValue": 0.0,
+        "todayGain": 0.0,
+        "portfolioHistory": [{"time": now, "value": PAPER_STARTING_BALANCE}],
+    }
+
+
+def _init_paper_db() -> None:
+    PAPER_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with sqlite3.connect(str(PAPER_DB_PATH), timeout=30) as conn:
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS hft_paper_portfolio (
+                id INTEGER PRIMARY KEY CHECK (id = 1),
+                portfolio_json TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            )
+            """
+        )
+
+
+def _save_paper_portfolio(portfolio: dict) -> dict:
+    with _paper_lock:
+        _init_paper_db()
+        portfolio = _recalculate_paper_portfolio(portfolio)
+        now = datetime.now().isoformat()
+        with sqlite3.connect(str(PAPER_DB_PATH), timeout=30) as conn:
+            conn.execute(
+                """
+                INSERT INTO hft_paper_portfolio (id, portfolio_json, updated_at)
+                VALUES (1, ?, ?)
+                ON CONFLICT(id) DO UPDATE SET
+                    portfolio_json = excluded.portfolio_json,
+                    updated_at = excluded.updated_at
+                """,
+                (json.dumps(portfolio, sort_keys=True, default=str), now),
+            )
+        return portfolio
+
+
+def _load_paper_portfolio() -> dict:
+    with _paper_lock:
+        _init_paper_db()
+        with sqlite3.connect(str(PAPER_DB_PATH), timeout=30) as conn:
+            row = conn.execute(
+                "SELECT portfolio_json FROM hft_paper_portfolio WHERE id = 1"
+            ).fetchone()
+        if not row:
+            return _save_paper_portfolio(_default_paper_portfolio())
+        try:
+            portfolio = json.loads(row[0])
+        except (TypeError, json.JSONDecodeError):
+            portfolio = _default_paper_portfolio()
+        portfolio.setdefault("cash", PAPER_STARTING_BALANCE)
+        portfolio.setdefault("startingBalance", PAPER_STARTING_BALANCE)
+        portfolio.setdefault("holdings", {})
+        portfolio.setdefault("tradeLog", [])
+        portfolio.setdefault("portfolioHistory", [])
+        return _recalculate_paper_portfolio(portfolio)
+
+
+def _estimate_paper_price(symbol: str, portfolio: Optional[dict] = None) -> float:
+    holdings = (portfolio or {}).get("holdings", {})
+    holding = holdings.get(symbol.upper())
+    if holding:
+        price = holding.get("currentPrice") or holding.get("avgPrice")
+        if price and float(price) > 0:
+            return round(float(price) * random.uniform(0.995, 1.005), 2)
+    base_prices = {
+        "RELIANCE.NS": 2850.0,
+        "TCS.NS": 3900.0,
+        "INFY.NS": 1500.0,
+        "HDFCBANK.NS": 1650.0,
+        "ICICIBANK.NS": 1200.0,
+        "SBIN.NS": 800.0,
+        "TATAMOTORS.NS": 950.0,
+        "WIPRO.NS": 520.0,
+    }
+    base = base_prices.get(symbol.upper(), 1000.0)
+    return round(base * random.uniform(0.98, 1.02), 2)
+
+
+def _recalculate_paper_portfolio(portfolio: dict) -> dict:
+    holdings = portfolio.setdefault("holdings", {})
+    cash = round(float(portfolio.get("cash", PAPER_STARTING_BALANCE) or 0), 2)
+    invested = 0.0
+    market_value = 0.0
+    unrealized = 0.0
+    for symbol, holding in list(holdings.items()):
+        qty = int(holding.get("quantity") or 0)
+        if qty <= 0:
+            holdings.pop(symbol, None)
+            continue
+        avg = float(holding.get("avgPrice") or 0)
+        current = float(holding.get("currentPrice") or avg or _estimate_paper_price(symbol, portfolio))
+        value = round(qty * current, 2)
+        pnl = round((current - avg) * qty, 2)
+        holding.update({
+            "symbol": symbol,
+            "quantity": qty,
+            "avgPrice": round(avg, 2),
+            "currentPrice": round(current, 2),
+            "value": value,
+            "pnl": pnl,
+            "pnlPercent": round(((current - avg) / avg) * 100, 2) if avg else 0.0,
+        })
+        invested += qty * avg
+        market_value += value
+        unrealized += pnl
+    total_value = round(cash + market_value, 2)
+    portfolio["cash"] = cash
+    portfolio["investedValue"] = round(invested, 2)
+    portfolio["unrealizedPnL"] = round(unrealized, 2)
+    portfolio["realizedPnL"] = round(float(portfolio.get("realizedPnL") or 0), 2)
+    portfolio["todayGain"] = round(unrealized + portfolio["realizedPnL"], 2)
+    portfolio["totalValue"] = total_value
+    portfolio["startingBalance"] = PAPER_STARTING_BALANCE
+    history = portfolio.setdefault("portfolioHistory", [])
+    now = datetime.now().isoformat()
+    if not history or history[-1].get("value") != total_value:
+        history.append({"time": now, "value": total_value})
+        portfolio["portfolioHistory"] = history[-100:]
+    return portfolio
+
+
+def _apply_paper_order(symbol: str, side: str, quantity: int, price: Optional[float] = None, source: str = "manual") -> dict:
+    symbol = symbol.upper().strip()
+    side = side.upper().strip()
+    if side not in {"BUY", "SELL"}:
+        raise HTTPException(status_code=400, detail="side must be BUY or SELL")
+    if quantity <= 0:
+        raise HTTPException(status_code=400, detail="quantity must be greater than zero")
+
+    with _paper_lock:
+        portfolio = _load_paper_portfolio()
+        trade_price = round(float(price) if price and price > 0 else _estimate_paper_price(symbol, portfolio), 2)
+        total = round(quantity * trade_price, 2)
+        holdings = portfolio.setdefault("holdings", {})
+        existing = holdings.get(symbol)
+
+        if side == "BUY":
+            if total > float(portfolio.get("cash", 0)):
+                raise HTTPException(status_code=400, detail="insufficient paper cash for order")
+            old_qty = int(existing.get("quantity", 0)) if existing else 0
+            old_avg = float(existing.get("avgPrice", trade_price)) if existing else trade_price
+            new_qty = old_qty + quantity
+            new_avg = ((old_qty * old_avg) + total) / new_qty
+            holdings[symbol] = {
+                "symbol": symbol,
+                "quantity": new_qty,
+                "avgPrice": round(new_avg, 2),
+                "currentPrice": trade_price,
+                "lastAction": "BUY",
+            }
+            portfolio["cash"] = round(float(portfolio.get("cash", 0)) - total, 2)
+        else:
+            if not existing or int(existing.get("quantity", 0)) < quantity:
+                raise HTTPException(status_code=400, detail="not enough paper holdings to sell")
+            old_qty = int(existing.get("quantity", 0))
+            avg = float(existing.get("avgPrice", trade_price))
+            new_qty = old_qty - quantity
+            realized = round((trade_price - avg) * quantity, 2)
+            portfolio["realizedPnL"] = round(float(portfolio.get("realizedPnL") or 0) + realized, 2)
+            portfolio["cash"] = round(float(portfolio.get("cash", 0)) + total, 2)
+            if new_qty == 0:
+                holdings.pop(symbol, None)
+            else:
+                existing.update({"quantity": new_qty, "currentPrice": trade_price, "lastAction": "SELL"})
+
+        ts = datetime.now().isoformat()
+        entry = {
+            "timestamp": ts,
+            "symbol": symbol,
+            "action": side,
+            "quantity": quantity,
+            "price": trade_price,
+            "total": total,
+            "source": source,
+        }
+        portfolio.setdefault("tradeLog", []).insert(0, entry)
+        portfolio["tradeLog"] = portfolio["tradeLog"][:100]
+        saved = _save_paper_portfolio(portfolio)
+        bot_state["portfolio"] = saved
+        return {"portfolio": saved, "entry": entry}
+
+
+async def _paper_auto_trade_cycle() -> None:
+    if bot_state.get("config", {}).get("mode") != "paper":
+        return
+    tickers = list(bot_state.get("config", {}).get("tickers") or [])
+    if not tickers:
+        logger.info("Paper auto-trade skipped: watchlist is empty")
+        return
+
+    await asyncio.sleep(2)
+    max_allocation = float(bot_state.get("config", {}).get("maxAllocation") or 0.25)
+    trades = 0
+    for symbol in tickers[:5]:
+        if bot_state.get("config", {}).get("mode") != "paper" or not bot_state.get("isRunning"):
+            break
+        portfolio = _load_paper_portfolio()
+        holdings = portfolio.get("holdings", {})
+        price = _estimate_paper_price(symbol, portfolio)
+        holding = holdings.get(symbol)
+        action = "SELL" if holding and random.random() < 0.35 else "BUY"
+
+        try:
+            if action == "BUY":
+                available_cash = float(portfolio.get("cash", 0))
+                allocation_cash = min(available_cash, PAPER_STARTING_BALANCE * max_allocation)
+                quantity = int(allocation_cash // price)
+                if quantity <= 0:
+                    continue
+            else:
+                quantity = int(holding.get("quantity", 0))
+                if quantity <= 0:
+                    continue
+            _apply_paper_order(symbol, action, quantity, price, source="bot")
+            trades += 1
+        except HTTPException as exc:
+            logger.info("Paper auto-trade skipped for %s: %s", symbol, exc.detail)
+
+    logger.info("Paper auto-trade cycle complete: %s trade(s) saved", trades)
+
+
+async def _paper_auto_trade_loop() -> None:
+    try:
+        while bot_state.get("isRunning") and bot_state.get("config", {}).get("mode") == "paper":
+            await _paper_auto_trade_cycle()
+            await asyncio.sleep(30)
+    except asyncio.CancelledError:
+        logger.info("Paper auto-trade loop cancelled")
+        raise
+    except Exception as exc:
+        logger.exception("Paper auto-trade loop failed: %s", exc)
+
+
+# ---------- In-memory state (unified with main backend; paper portfolio persisted in SQLite) ----------
 bot_state = {
     "isRunning": False,
     "config": {
@@ -83,45 +338,7 @@ bot_state = {
         "maxAllocation": 0.25,
         "stopLoss": 0.05,
     },
-    "portfolio": {
-        "totalValue": 1050000,
-        "cash": 850000,
-        "startingBalance": 1000000,
-        "holdings": {
-            "RELIANCE.NS": {
-                "symbol": "RELIANCE.NS",
-                "quantity": 50,
-                "avgPrice": 2500,
-                "currentPrice": 2600,
-                "lastAction": "BUY",
-            },
-            "TCS.NS": {
-                "symbol": "TCS.NS",
-                "quantity": 100,
-                "avgPrice": 3200,
-                "currentPrice": 3300,
-                "lastAction": "BUY",
-            },
-        },
-        "tradeLog": [
-            {
-                "timestamp": (datetime.now() - timedelta(hours=2)).isoformat(),
-                "symbol": "RELIANCE.NS",
-                "action": "BUY",
-                "quantity": 50,
-                "price": 2500,
-                "total": 125000,
-            },
-            {
-                "timestamp": (datetime.now() - timedelta(hours=1)).isoformat(),
-                "symbol": "TCS.NS",
-                "action": "BUY",
-                "quantity": 100,
-                "price": 3200,
-                "total": 320000,
-            },
-        ],
-    },
+    "portfolio": _load_paper_portfolio(),
     "chatMessages": [],
 }
 
@@ -181,6 +398,7 @@ def _hft_portfolio():
             "holdings": {},
             "tradeLog": [],
         }
+    bot_state["portfolio"] = _load_paper_portfolio()
     return bot_state["portfolio"]
 
 
@@ -205,7 +423,7 @@ async def get_portfolio():
 
 @hft_router.get("/trades")
 async def get_trades(limit: int = 10):
-    return []
+    return _hft_portfolio().get("tradeLog", [])[:limit]
 
 
 # ---------- Watchlist ----------
@@ -371,19 +589,27 @@ async def _hft2_sync_watchlist_and_predict() -> None:
 
 @hft_router.post("/bot/start")
 async def start_bot():
+    global _paper_auto_task
     logger.info("Start Bot requested (HFT2_BACKEND_URL=%s)", "set" if os.environ.get("HFT2_BACKEND_URL") else "not set")
     if not os.environ.get("HFT2_BACKEND_URL"):
         _start_hft2_stack()
         asyncio.create_task(_hft2_sync_watchlist_and_predict())
     bot_state["isRunning"] = True
+    if bot_state.get("config", {}).get("mode") == "paper":
+        if not _paper_auto_task or _paper_auto_task.done():
+            _paper_auto_task = asyncio.create_task(_paper_auto_trade_loop())
     logger.info("HFT Bot started (isRunning=True)")
     return {"status": "success", "message": "Bot started", "isRunning": True}
 
 
 @hft_router.post("/bot/stop")
 async def stop_bot():
+    global _paper_auto_task
     _stop_hft2_stack()
     bot_state["isRunning"] = False
+    if _paper_auto_task and not _paper_auto_task.done():
+        _paper_auto_task.cancel()
+    _paper_auto_task = None
     logger.info("HFT Bot stopped")
     return {"status": "success", "message": "Bot stopped", "isRunning": False}
 
@@ -551,6 +777,20 @@ async def mcp_execute(request: Request, body: dict):
     symbol = (body.get("symbol") or "").upper()
     side = (body.get("side") or "BUY").upper()
     qty = int(body.get("quantity", 0))
+    if bot_state.get("config", {}).get("mode") == "paper":
+        result = _apply_paper_order(
+            symbol=symbol,
+            side=side,
+            quantity=qty,
+            price=float(body.get("price")) if body.get("price") else None,
+            source="mcp",
+        )
+        return {
+            "status": "success",
+            "message": f"Paper order: {side} {qty} {symbol}",
+            "order_id": f"paper-{result['entry']['timestamp']}",
+            "portfolio": result["portfolio"],
+        }
     return {
         "status": "success",
         "message": f"Paper order: {side} {qty} {symbol} (configure broker for live execution)",
@@ -590,19 +830,22 @@ async def get_predictions(request: Request, symbols: str = "RELIANCE.NS", horizo
 # ---------- Order (buy/sell) stub for demat/live ----------
 @hft_router.post("/order")
 async def place_order(order: OrderRequest):
-    # Paper: append to tradeLog; live would call broker
-    ts = datetime.now().isoformat()
-    total = order.quantity * (order.price or 0)
-    entry = {
-        "timestamp": ts,
-        "symbol": order.symbol.upper(),
-        "action": order.side.upper(),
-        "quantity": order.quantity,
-        "price": order.price or 0,
-        "total": total,
+    if bot_state.get("config", {}).get("mode") == "live":
+        raise HTTPException(status_code=501, detail="Live order execution is not wired in this route")
+    result = _apply_paper_order(
+        symbol=order.symbol,
+        side=order.side,
+        quantity=order.quantity,
+        price=order.price,
+        source="manual",
+    )
+    return {
+        "status": "success",
+        "order_id": f"paper-{result['entry']['timestamp']}",
+        "message": "Order placed (paper)",
+        "trade": result["entry"],
+        "portfolio": result["portfolio"],
     }
-    bot_state["portfolio"]["tradeLog"].insert(0, entry)
-    return {"status": "success", "order_id": f"paper-{ts}", "message": "Order placed (paper)"}
 
 
 # ---------- Production stubs ----------

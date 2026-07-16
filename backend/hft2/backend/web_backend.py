@@ -1839,27 +1839,43 @@ async def _continuous_trading_loop(username: str):
                             # Execute trade if signal passed all filters
                             if (rec == "BUY" or rec == "SELL"):
                                 logger.info(
-                                    f"🤖 Auto-{rec} signal for {sym} (User: {username}, confidence={conf:.2f})")
-                                if hasattr(bot, 'live_executor') and bot.live_executor:
+                                    f"Auto-{rec} signal for {sym} (User: {username}, confidence={conf:.2f})")
+                                current_bot_mode = bot.config.get("mode", "paper")
+                                loop = asyncio.get_event_loop()
+                                if current_bot_mode == "live" and hasattr(bot, "live_executor") and bot.live_executor:
                                     signal_data = {
                                         "confidence": conf,
                                         "current_price": analysis.get("current_price") or analysis.get("target_price"),
                                         "stop_loss": analysis.get("stop_loss"),
                                         "take_profit": analysis.get("target_price"),
                                     }
-                                    loop = asyncio.get_event_loop()
                                     if rec == "BUY":
                                         result = await loop.run_in_executor(
                                             None,
-                                            lambda s=sym, sd=signal_data: bot.live_executor.execute_buy_order(
-                                                s, sd)
+                                            lambda s=sym, sd=signal_data: bot.live_executor.execute_buy_order(s, sd)
                                         )
                                     else:
                                         result = await loop.run_in_executor(
                                             None,
-                                            lambda s=sym, sd=signal_data: bot.live_executor.execute_sell_order(
-                                                s, sd)
+                                            lambda s=sym, sd=signal_data: bot.live_executor.execute_sell_order(s, sd)
                                         )
+                                elif current_bot_mode == "paper":
+                                    # Paper mode: execute via VirtualPortfolio (no broker needed)
+                                    portfolio = getattr(getattr(bot, "trading_bot", None), "portfolio", None)
+                                    price = analysis.get("current_price") or analysis.get("target_price") or 0
+                                    if portfolio and price and price > 0:
+                                        qty = max(1, int((portfolio.cash * 0.10) / price)) if rec == "BUY" else 1
+                                        if rec == "BUY":
+                                            ok = await loop.run_in_executor(None, lambda: portfolio.buy(sym, qty, price))
+                                        else:
+                                            holding = portfolio.holdings.get(sym, {})
+                                            qty = holding.get("qty", 0)
+                                            ok = await loop.run_in_executor(None, lambda: portfolio.sell(sym, qty, price)) if qty > 0 else False
+                                        result = {"success": ok, "message": f"[PAPER] {rec} {qty} {sym} @ Rs.{price:.2f}"}
+                                    else:
+                                        result = {"success": False, "message": "No price available for paper trade"}
+                                else:
+                                    result = {"success": False, "message": "No executor available"}
 
                                     if result and result.get("success"):
                                         logger.info(
@@ -7969,11 +7985,40 @@ async def place_order(request: OrderRequest, user_demat: tuple = Depends(get_opt
                 "mode": "live",
             }
 
-        # Non-live mode is now disabled
-        raise HTTPException(
-            status_code=400,
-            detail="Paper mode is disabled. Manual orders only supported in live mode."
-        )
+        # Paper mode: simulate trade via VirtualPortfolio
+        if current_mode == "paper":
+            portfolio = getattr(getattr(bot, "trading_bot", None), "portfolio", None)
+            if not portfolio:
+                raise HTTPException(status_code=503, detail="Paper portfolio not initialized")
+            price = request.price or 0.0
+            if price <= 0:
+                # Fetch current price from yfinance as fallback
+                try:
+                    import yfinance as yf
+                    ticker_data = yf.Ticker(request.symbol)
+                    hist = ticker_data.history(period="1d")
+                    price = float(hist["Close"].iloc[-1]) if not hist.empty else 0.0
+                except Exception:
+                    price = 0.0
+            if price <= 0:
+                raise HTTPException(status_code=400, detail="Could not determine price for paper trade")
+            if side == "BUY":
+                ok = portfolio.buy(request.symbol, request.quantity, price)
+            else:
+                ok = portfolio.sell(request.symbol, request.quantity, price)
+            if not ok:
+                raise HTTPException(status_code=400, detail=f"Paper {side} failed - check cash/holdings")
+            return {
+                "success": True,
+                "status": "executed",
+                "order_id": f"PAPER-{int(__import__("time").time()*1000)}",
+                "symbol": request.symbol,
+                "side": side,
+                "quantity": request.quantity,
+                "price": price,
+                "message": f"[PAPER] {side} {request.quantity} {request.symbol} @ Rs.{price:.2f}",
+                "mode": "paper",
+            }
 
     except HTTPException:
         raise

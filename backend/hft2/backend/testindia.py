@@ -1322,26 +1322,27 @@ class VirtualPortfolio:
             return False
 
         try:
-            # Place actual order via Dhan API (live trading only)
-            if self.api:
+            if self.mode == "paper":
+                # Paper trading: simulate locally, no broker needed
+                logger.info(f"[PAPER] SIMULATED BUY {qty} {asset} @ Rs.{price:.2f}")
+            else:
+                # Live trading: place real order via Dhan API
+                if not self.api:
+                    logger.error("Broker API not initialized - cannot execute live trade")
+                    return False
                 order_result = self.api.place_order(
                     security_id=self.get_security_id(asset),
                     exchange_segment="NSE_EQ",
                     transaction_type="BUY",
                     order_type="MARKET",
                     quantity=qty,
-                    price=0,  # Market order uses 0 for price
+                    price=0,
                     validity="DAY",
                     product_type="CNC"
                 )
                 logger.info(
                     f"✅ LIVE ORDER PLACED: BUY {qty} {asset} @ Rs.{price} | Result: {order_result}")
-            else:
-                logger.error(
-                    "Broker API not initialized - cannot execute live trade")
-                return False
-
-            # Update portfolio regardless of mode
+            # Update portfolio
             self.cash -= cost
             if asset in self.holdings:
                 current_qty = self.holdings[asset]["qty"]
@@ -1398,15 +1399,21 @@ class VirtualPortfolio:
             return False
 
         try:
-            # Place actual order via Dhan API (live trading only)
-            if self.api:
+            if self.mode == "paper":
+                # Paper trading: simulate locally, no broker needed
+                logger.info(f"[PAPER] SIMULATED SELL {qty} {asset} @ Rs.{price:.2f}")
+            else:
+                # Live trading: place real order via Dhan API
+                if not self.api:
+                    logger.error("Broker API not initialized - cannot execute live trade")
+                    return False
                 order_result = self.api.place_order(
                     security_id=self.get_security_id(asset),
                     exchange_segment="NSE_EQ",
                     transaction_type="SELL",
                     order_type="MARKET",
                     quantity=qty,
-                    price=0,  # Market order uses 0 for price
+                    price=0,
                     validity="DAY",
                     product_type="CNC"
                 )

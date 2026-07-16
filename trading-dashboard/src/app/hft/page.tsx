@@ -15,6 +15,7 @@ import type { HftBotData, HftTradingMode } from '@/types/hft';
 
 import { CheckCircle2, AlertCircle, RefreshCw, Play, Square, LayoutDashboard, Briefcase, MessageCircle, Loader2 } from 'lucide-react';
 
+const PAPER_STARTING_BALANCE = 100000;
 
 export default function HftPage() {
     const { theme } = useTheme();
@@ -24,11 +25,14 @@ export default function HftPage() {
     const [activeTab, setActiveTab] = useState<'dashboard' | 'portfolio' | 'activity' | 'watchlist'>('dashboard');
     const [botData, setBotData] = useState<HftBotData>({
         portfolio: {
-            totalValue: 0,
-            cash: 0,
+            totalValue: PAPER_STARTING_BALANCE,
+            cash: PAPER_STARTING_BALANCE,
             holdings: {},
             tradeLog: [],
-            startingBalance: 0
+            startingBalance: PAPER_STARTING_BALANCE,
+            investedValue: 0,
+            todayGain: 0,
+            portfolioHistory: [{ time: new Date().toISOString(), value: PAPER_STARTING_BALANCE }]
         },
         config: {
             mode: 'paper',
