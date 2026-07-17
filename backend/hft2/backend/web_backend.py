@@ -226,6 +226,7 @@ WEBSOCKET_PING_INTERVAL = 20
 WEBSOCKET_PING_TIMEOUT = 10
 DEFAULT_MAX_TOKENS = 2048
 DEFAULT_TEMPERATURE = 0.7
+PAPER_STARTING_BALANCE = 100000.0
 
 # Priority 4: Optimized import structure with error handling
 try:
@@ -1125,6 +1126,11 @@ def _offline_bot_data(username: str = "anonymous"):
 
     # Analysis is now per-user in state["_last_bot_analysis"]
     analysis_list = list(state.get("_last_bot_analysis", {}).values())
+    if str(saved.get("mode", "paper")).strip().lower() == "paper":
+        stored_bot_data = _paper_store_to_bot_data(username, saved, state)
+        if stored_bot_data:
+            stored_bot_data["analysis"] = analysis_list
+            return stored_bot_data
 
     return {
         "isRunning": state.get("bot_running", False) or state.get("_bot_initializing", False),
@@ -1136,12 +1142,12 @@ def _offline_bot_data(username: str = "anonymous"):
             "maxTradeLimit": saved.get("max_trade_limit", 10),
         },
         "portfolio": {
-            "totalValue": saved.get("starting_balance", 10000),
-            "cash": saved.get("starting_balance", 10000),
+            "totalValue": saved.get("starting_balance", PAPER_STARTING_BALANCE),
+            "cash": saved.get("starting_balance", PAPER_STARTING_BALANCE),
             "investedValue": 0,
             "todayGain": 0,
             "holdings": {},
-            "startingBalance": saved.get("starting_balance", 10000),
+            "startingBalance": saved.get("starting_balance", PAPER_STARTING_BALANCE),
             "unrealizedPnL": 0,
             "realizedPnL": 0,
             "tradeLog": [],
@@ -1149,6 +1155,200 @@ def _offline_bot_data(username: str = "anonymous"):
         "analysis": analysis_list,
         "lastUpdate": datetime.now().isoformat(),
     }
+
+
+def _paper_metrics_defaults() -> Dict[str, Any]:
+    """PortfolioMetrics-shaped defaults for paper trading."""
+    return {
+        "total_value": PAPER_STARTING_BALANCE,
+        "cash": PAPER_STARTING_BALANCE,
+        "cash_percentage": 100.0,
+        "holdings": {},
+        "total_invested": 0.0,
+        "invested_percentage": 0.0,
+        "current_holdings_value": 0.0,
+        "total_return": 0.0,
+        "return_percentage": 0.0,
+        "total_return_pct": 0.0,
+        "unrealized_pnl": 0.0,
+        "unrealized_pnl_pct": 0.0,
+        "realized_pnl": 0.0,
+        "realized_pnl_pct": 0.0,
+        "total_exposure": 0.0,
+        "exposure_ratio": 0.0,
+        "profit_loss": 0.0,
+        "profit_loss_pct": 0.0,
+        "active_positions": 0,
+        "positions": 0,
+        "trades_today": 0,
+        "initial_balance": PAPER_STARTING_BALANCE,
+        "trade_log": [],
+    }
+
+
+def _load_paper_portfolio_from_store(username: Optional[str]) -> Optional[Dict[str, Any]]:
+    try:
+        from paper_portfolio_store import load_paper_portfolio
+        return load_paper_portfolio(username, PAPER_STARTING_BALANCE)
+    except Exception as e:
+        logger.warning(f"Could not load paper portfolio for {username}: {e}")
+        return None
+
+
+def _save_paper_portfolio_to_store(username: Optional[str], portfolio_data: Dict[str, Any], trade_log: Optional[list] = None) -> bool:
+    try:
+        from paper_portfolio_store import save_paper_portfolio
+        return save_paper_portfolio(username, portfolio_data, trade_log, PAPER_STARTING_BALANCE)
+    except Exception as e:
+        logger.warning(f"Could not save paper portfolio for {username}: {e}")
+        return False
+
+
+def _paper_store_to_metrics(portfolio_data: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    if not isinstance(portfolio_data, dict):
+        return _paper_metrics_defaults()
+
+    cash = float(portfolio_data.get("cash", PAPER_STARTING_BALANCE) or 0)
+    starting_balance = float(
+        portfolio_data.get("starting_balance", PAPER_STARTING_BALANCE) or PAPER_STARTING_BALANCE)
+    holdings_raw = portfolio_data.get("holdings", {}) if isinstance(
+        portfolio_data.get("holdings"), dict) else {}
+    trade_log = portfolio_data.get("trade_log", []) if isinstance(
+        portfolio_data.get("trade_log"), list) else []
+    realized_pnl = float(portfolio_data.get("realized_pnl", 0) or 0)
+    stored_unrealized = float(portfolio_data.get("unrealized_pnl", 0) or 0)
+
+    holdings = {}
+    total_invested = 0.0
+    current_holdings_value = 0.0
+    unrealized_pnl = 0.0
+
+    for ticker, data in holdings_raw.items():
+        if not isinstance(data, dict):
+            continue
+        qty = float(data.get("qty", data.get("quantity", 0)) or 0)
+        avg_price = float(data.get("avg_price", data.get("avgPrice", 0)) or 0)
+        current_price = float(
+            data.get("currentPrice", data.get("current_price", avg_price)) or avg_price)
+        if qty <= 0:
+            continue
+        invested = qty * avg_price
+        market_value = qty * current_price
+        total_invested += invested
+        current_holdings_value += market_value
+        unrealized_pnl += market_value - invested
+        holdings[ticker] = {
+            **data,
+            "qty": qty,
+            "quantity": qty,
+            "avg_price": avg_price,
+            "avgPrice": avg_price,
+            "currentPrice": current_price,
+            "current_value": market_value,
+        }
+
+    if not holdings and stored_unrealized:
+        unrealized_pnl = stored_unrealized
+
+    total_value = cash + current_holdings_value
+    total_return = realized_pnl + unrealized_pnl
+    cash_pct = (cash / total_value * 100) if total_value > 0 else 100
+    invested_pct = (total_invested / total_value * 100) if total_value > 0 else 0
+    unrealized_pct = (unrealized_pnl / total_invested *
+                      100) if total_invested > 0 else 0
+    realized_pct = (realized_pnl / starting_balance *
+                    100) if starting_balance > 0 else 0
+    total_return_pct = (total_return / starting_balance *
+                        100) if starting_balance > 0 else 0
+
+    return {
+        "total_value": round(total_value, 2),
+        "cash": round(cash, 2),
+        "cash_percentage": round(cash_pct, 2),
+        "holdings": holdings,
+        "total_invested": round(total_invested, 2),
+        "invested_percentage": round(invested_pct, 2),
+        "current_holdings_value": round(current_holdings_value, 2),
+        "total_return": round(total_return, 2),
+        "return_percentage": round(total_return_pct, 2),
+        "total_return_pct": round(total_return_pct, 2),
+        "unrealized_pnl": round(unrealized_pnl, 2),
+        "unrealized_pnl_pct": round(unrealized_pct, 2),
+        "realized_pnl": round(realized_pnl, 2),
+        "realized_pnl_pct": round(realized_pct, 2),
+        "total_exposure": round(current_holdings_value, 2),
+        "exposure_ratio": round((total_invested / total_value) * 100, 2) if total_value > 0 else 0,
+        "profit_loss": round(total_return, 2),
+        "profit_loss_pct": round(total_return_pct, 2),
+        "active_positions": len(holdings),
+        "positions": len(holdings),
+        "trades_today": len([t for t in trade_log if str(t.get("date") or t.get("timestamp", "")).startswith(datetime.now().strftime("%Y-%m-%d"))]),
+        "initial_balance": starting_balance,
+        "trade_log": trade_log,
+    }
+
+
+def _paper_store_to_bot_data(username: str, saved: Dict[str, Any], state: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    stored = _load_paper_portfolio_from_store(username)
+    if not stored:
+        return None
+    metrics = _paper_store_to_metrics(stored)
+    return {
+        "isRunning": state.get("bot_running", False) or state.get("_bot_initializing", False),
+        "config": {
+            "mode": "paper",
+            "tickers": saved.get("tickers", []),
+            "stopLossPct": saved.get("stop_loss_pct", 0.05),
+            "maxAllocation": saved.get("max_capital_per_trade", 0.25),
+            "maxTradeLimit": saved.get("max_trade_limit", 10),
+        },
+        "portfolio": {
+            "totalValue": metrics["total_value"],
+            "cash": metrics["cash"],
+            "investedValue": metrics.get("total_invested", 0),
+            "todayGain": metrics.get("total_return", 0),
+            "holdings": metrics["holdings"],
+            "startingBalance": metrics.get("initial_balance", PAPER_STARTING_BALANCE),
+            "unrealizedPnL": metrics["unrealized_pnl"],
+            "realizedPnL": metrics["realized_pnl"],
+            "tradeLog": list(reversed(metrics.get("trade_log", [])[-50:])),
+            "portfolioHistory": stored.get("portfolio_history", []),
+        },
+        "analysis": list(state.get("_last_bot_analysis", {}).values()),
+        "lastUpdate": datetime.now().isoformat(),
+    }
+
+
+def _normalize_paper_bot_data(data: Dict[str, Any]) -> Dict[str, Any]:
+    """Prevent stale zero live/cache payloads from showing in paper mode."""
+    if not isinstance(data, dict):
+        return data
+    cfg = data.get("config") if isinstance(data.get("config"), dict) else {}
+    if str(cfg.get("mode", "paper")).strip().lower() != "paper":
+        return data
+    portfolio = data.get("portfolio")
+    if not isinstance(portfolio, dict):
+        return data
+    holdings = portfolio.get("holdings") or {}
+    cash = float(portfolio.get("cash") or 0)
+    total_value = float(portfolio.get("totalValue") or portfolio.get("total_value") or 0)
+    starting_balance = float(portfolio.get("startingBalance") or portfolio.get("initial_balance") or 0)
+    if holdings or cash > 0 or total_value > 0 or starting_balance > 0:
+        return data
+    fixed = dict(data)
+    fixed["portfolio"] = {
+        **portfolio,
+        "totalValue": PAPER_STARTING_BALANCE,
+        "cash": PAPER_STARTING_BALANCE,
+        "investedValue": 0,
+        "todayGain": 0,
+        "holdings": {},
+        "startingBalance": PAPER_STARTING_BALANCE,
+        "unrealizedPnL": 0,
+        "realizedPnL": 0,
+        "tradeLog": portfolio.get("tradeLog", []),
+    }
+    return fixed
 
 
 # MCP components
@@ -1877,7 +2077,7 @@ async def _continuous_trading_loop(username: str):
                                 else:
                                     result = {"success": False, "message": "No executor available"}
 
-                                    if result and result.get("success"):
+                                if result and result.get("success"):
                                         logger.info(
                                             f"✅ Auto-{rec} executed for {sym} (User: {username}): {result.get('message')}")
 
@@ -1892,7 +2092,7 @@ async def _continuous_trading_loop(username: str):
                                                 f"🛑 Trade cycle complete - stopping bot for {username}")
                                             state["bot_running"] = False
                                             break
-                                    else:
+                                else:
                                         # Record failed execution
                                         signal_filter.record_trade_execution(
                                             sym, rec, False)
@@ -3574,6 +3774,11 @@ class WebTradingBot:
                     "initial_balance": 0.0
                 }
 
+            if current_mode == "paper":
+                stored_portfolio = _load_paper_portfolio_from_store(self.username)
+                if stored_portfolio:
+                    return _paper_store_to_metrics(stored_portfolio)
+
             # FIXED: Read from the correct Indian trading bot portfolio files
             # Use absolute path to data folder and current mode
             current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -3581,16 +3786,45 @@ class WebTradingBot:
             current_mode = self.config.get("mode", "paper")
             # Use Indian-specific portfolio files that the trading bot actually writes to
             portfolio_file = os.path.join(
-                project_root, "data", f"portfolio_india_{current_mode}.json")
+                project_root, "data", "users", self.username, f"portfolio_india_{current_mode}.json")
             # Removed annoying log - file read is silent now
             if os.path.exists(portfolio_file):
                 with open(portfolio_file, 'r') as f:
                     portfolio_data = json.load(f)
 
                 starting_balance = portfolio_data.get(
-                    'starting_balance', 0)
+                    'starting_balance', PAPER_STARTING_BALANCE if current_mode == "paper" else 0)
                 cash = portfolio_data.get('cash', starting_balance)
                 holdings = portfolio_data.get('holdings', {})
+                trade_log = self.get_recent_trades(limit=100)
+
+                if current_mode == "paper":
+                    empty_paper_portfolio = not holdings and not trade_log
+                    starting_balance_float = float(starting_balance or 0)
+                    cash_float = float(cash or 0)
+                    if starting_balance_float < PAPER_STARTING_BALANCE:
+                        cash_delta = PAPER_STARTING_BALANCE - max(starting_balance_float, 0)
+                        starting_balance = PAPER_STARTING_BALANCE
+                        cash = max(cash_float, 0) + cash_delta
+                        portfolio_data["starting_balance"] = starting_balance
+                        portfolio_data["cash"] = cash
+                        with open(portfolio_file, "w") as f:
+                            json.dump(portfolio_data, f, indent=4)
+                        _save_paper_portfolio_to_store(
+                            self.username, portfolio_data, trade_log)
+                        logger.info(
+                            f"Upgraded paper portfolio baseline to Rs.{PAPER_STARTING_BALANCE:.2f} for {self.username}; cash is now Rs.{cash:.2f}")
+                    elif empty_paper_portfolio and cash_float <= 0:
+                        starting_balance = PAPER_STARTING_BALANCE
+                        cash = PAPER_STARTING_BALANCE
+                        portfolio_data["starting_balance"] = starting_balance
+                        portfolio_data["cash"] = cash
+                        with open(portfolio_file, "w") as f:
+                            json.dump(portfolio_data, f, indent=4)
+                        _save_paper_portfolio_to_store(
+                            self.username, portfolio_data, trade_log)
+                        logger.info(
+                            f"Reset empty paper portfolio metrics cash to Rs.{cash:.2f} for {self.username}")
 
                 # Get current prices for unrealized P&L calculation
                 current_prices = {}
@@ -3674,10 +3908,6 @@ class WebTradingBot:
                         'currentPrice': current_prices.get(ticker, data['avg_price'])
                     }
 
-                # Get trade log
-                trade_log = self.get_recent_trades(
-                    limit=100)  # Get all trades for portfolio
-
                 # Professional calculations
                 total_invested = sum(data['qty'] * data['avg_price']
                                      for data in holdings.values())
@@ -3719,7 +3949,7 @@ class WebTradingBot:
                 }
             else:
                 # Fallback to default values if no portfolio file exists
-                starting_balance = self.config.get('starting_balance', 10000)
+                starting_balance = self.config.get('starting_balance', PAPER_STARTING_BALANCE if current_mode == "paper" else 0)
                 return {
                     "total_value": starting_balance,
                     "cash": starting_balance,
@@ -3734,7 +3964,7 @@ class WebTradingBot:
                 }
         except Exception as e:
             logger.error(f"Error getting portfolio metrics: {e}")
-            starting_balance = self.config.get('starting_balance', 10000)
+            starting_balance = self.config.get('starting_balance', PAPER_STARTING_BALANCE if self.config.get("mode", "paper") == "paper" else 0)
             return {
                 "total_value": starting_balance,
                 "cash": starting_balance,
@@ -3760,6 +3990,12 @@ class WebTradingBot:
             project_root = os.path.dirname(current_dir)
             current_mode = self.config.get("mode", "paper")
             username = self.username or "anonymous"
+            if current_mode == "paper":
+                stored_portfolio = _load_paper_portfolio_from_store(username)
+                if stored_portfolio:
+                    trades = stored_portfolio.get("trade_log", [])
+                    recent_trades = trades[-limit:] if trades else []
+                    return list(reversed(recent_trades))
 
             # FIXED: Read from the user-specific data directory (matches VirtualPortfolio's write path)
             trade_log_file = os.path.join(
@@ -3807,22 +4043,23 @@ class WebTradingBot:
             }
         except Exception as e:
             logger.error(f"Error getting complete bot data: {e}")
+            paper_balance = PAPER_STARTING_BALANCE if self.config.get("mode", "paper") == "paper" else 0
             return {
                 "isRunning": False,
                 "config": {
-                    "mode": "paper",
+                    "mode": self.config.get("mode", "paper"),
                     "tickers": [],
                     "stopLossPct": 0.05,
                     "maxAllocation": 0.25,
                     "maxTradeLimit": 10
                 },
                 "portfolio": {
-                    "totalValue": 0,
-                    "cash": 0,
+                    "totalValue": paper_balance,
+                    "cash": paper_balance,
                     "investedValue": 0,
                     "todayGain": 0,
                     "holdings": {},
-                    "startingBalance": 0,
+                    "startingBalance": paper_balance,
                     "unrealizedPnL": 0,
                     "realizedPnL": 0,
                     "tradeLog": []
@@ -4515,8 +4752,8 @@ def initialize_bot(username: str = "anonymous"):
                 "Configuration schema not available, using legacy loading")
             config = {
                 "tickers": [],
-                "starting_balance": 0,
-                "current_portfolio_value": 0,
+                "starting_balance": PAPER_STARTING_BALANCE if default_mode == "paper" else 0,
+                "current_portfolio_value": PAPER_STARTING_BALANCE if default_mode == "paper" else 0,
                 "current_pnl": 0,
                 "mode": default_mode,
                 "riskLevel": "MEDIUM",
@@ -4545,8 +4782,19 @@ def initialize_bot(username: str = "anonymous"):
                     "stop_loss_pct": saved_config.get("stop_loss_pct", config["stop_loss_pct"]),
                     "max_capital_per_trade": saved_config.get("max_capital_per_trade", config["max_capital_per_trade"]),
                     "max_trade_limit": saved_config.get("max_trade_limit", config["max_trade_limit"]),
+                    "starting_balance": saved_config.get("starting_balance", config["starting_balance"]),
+                    "current_portfolio_value": saved_config.get("current_portfolio_value", config["current_portfolio_value"]),
                     "tickers": saved_config.get("tickers", [])
                 })
+
+        if config.get("mode") == "paper":
+            for key in ("starting_balance", "current_portfolio_value"):
+                try:
+                    value = float(config.get(key, 0) or 0)
+                except (TypeError, ValueError):
+                    value = 0
+                if value < PAPER_STARTING_BALANCE:
+                    config[key] = PAPER_STARTING_BALANCE
 
         # Apply user context if pending (per-user state, NOT globals — keeps isolation)
         pending = state.get("_pending_bot_user_context")
@@ -6574,6 +6822,10 @@ async def get_bot_data(user=Depends(get_current_user_required)):
 
     if isinstance(cached, dict):
         cached["isRunning"] = state.get("bot_running", False)
+        if str(effective_mode).strip().lower() == "paper":
+            cached_config = cached.setdefault("config", {})
+            if isinstance(cached_config, dict):
+                cached_config["mode"] = "paper"
         if "portfolio" not in cached and "holdings" in cached:
             return {
                 "isRunning": state.get("bot_running", False),
@@ -6582,7 +6834,7 @@ async def get_bot_data(user=Depends(get_current_user_required)):
                 "lastUpdate": datetime.now().isoformat(),
                 "config": {}
             }
-        return cached
+        return _normalize_paper_bot_data(cached)
 
     return _offline_bot_data(username)
 
@@ -6596,8 +6848,23 @@ async def get_portfolio(user_demat: tuple = Depends(get_optional_user_demat)):
             user_demat, tuple) else (None, None)
         username = payload.get("sub") if payload else "guest"
         state = get_user_state(username)
+        bot = state.get("trading_bot")
+        current_mode = str(
+            (bot.config.get("mode") if bot and hasattr(bot, "config") else None)
+            or get_current_saved_mode(username)
+            or "paper"
+        ).strip().lower()
 
-        if demat and demat.get("access_token") and demat.get("client_id"):
+        if current_mode == "paper":
+            if bot:
+                metrics = bot.get_portfolio_metrics()
+                return PortfolioMetrics(**metrics)
+            stored_portfolio = _load_paper_portfolio_from_store(username)
+            if stored_portfolio:
+                return PortfolioMetrics(**_paper_store_to_metrics(stored_portfolio))
+            return PortfolioMetrics(**_paper_metrics_defaults())
+
+        if current_mode == "live" and demat and demat.get("access_token") and demat.get("client_id"):
             try:
                 from dhan_client import get_live_portfolio
                 loop = asyncio.get_event_loop()
@@ -6614,7 +6881,6 @@ async def get_portfolio(user_demat: tuple = Depends(get_optional_user_demat)):
                     f"Demat portfolio fetch failed for {username}: {e}")
 
         # Fallback to user-specific bot instance
-        bot = state.get("trading_bot")
         if bot:
             metrics = bot.get_portfolio_metrics()
             return PortfolioMetrics(**metrics)
@@ -6653,6 +6919,10 @@ async def get_trades(limit: int = 10, user_demat: tuple = Depends(get_optional_u
                 timeout=3.0,
             )
             return trades
+        stored_portfolio = _load_paper_portfolio_from_store(username)
+        if stored_portfolio:
+            trades = stored_portfolio.get("trade_log", [])
+            return list(reversed(trades[-limit:] if trades else []))
         return []
     except Exception as e:
         logger.error(f"Error getting trades for {username}: {e}")
@@ -6666,8 +6936,23 @@ async def get_realtime_portfolio(user_demat: tuple = Depends(get_optional_user_d
         user_demat, tuple) else (None, None)
     username = payload.get("sub") if payload else "guest"
     state = get_user_state(username)
+    bot = state.get("trading_bot")
+    current_mode = str(
+        (bot.config.get("mode") if bot and hasattr(bot, "config") else None)
+        or get_current_saved_mode(username)
+        or "paper"
+    ).strip().lower()
 
-    if demat and demat.get("access_token") and demat.get("client_id"):
+    if current_mode == "paper" and not bot:
+        stored_portfolio = _load_paper_portfolio_from_store(username)
+        return {
+            "portfolio_metrics": _paper_store_to_metrics(stored_portfolio) if stored_portfolio else _paper_metrics_defaults(),
+            "current_prices": {},
+            "last_updated": datetime.now().isoformat(),
+            "market_status": _get_indian_market_status()
+        }
+
+    if current_mode == "live" and demat and demat.get("access_token") and demat.get("client_id"):
         try:
             from dhan_client import get_live_portfolio
             loop = asyncio.get_event_loop()
@@ -6694,7 +6979,6 @@ async def get_realtime_portfolio(user_demat: tuple = Depends(get_optional_user_d
             logger.warning(f"Realtime demat fetch failed: {e}")
 
     try:
-        bot = state.get("trading_bot")
         if bot and bot.config.get("mode") == "live":
             try:
                 # Force sync with Dhan account to get latest balance

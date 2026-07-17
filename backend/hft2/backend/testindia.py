@@ -61,6 +61,7 @@ import logging
 # Set up basic logger for early use
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+PAPER_STARTING_BALANCE = 100000.0
 # ThreadPoolExecutor and multiprocessing imports removed - not used in current implementation
 
 def _safe_construct(cls, **kwargs):
@@ -1080,11 +1081,15 @@ class DataFeed:
 class VirtualPortfolio:
     def __init__(self, config, username=None):
         self.username = username or config.get("username", "anonymous")
-        self.starting_balance = config["starting_balance"]
+        self.mode = config.get("mode", "live")
+        if self.mode == "paper":
+            configured_balance = float(config.get("starting_balance", PAPER_STARTING_BALANCE) or PAPER_STARTING_BALANCE)
+            self.starting_balance = configured_balance if configured_balance > 0 else PAPER_STARTING_BALANCE
+        else:
+            self.starting_balance = float(config.get("starting_balance", 0) or 0)
         self.cash = self.starting_balance
         self.holdings = {}  # {asset: {qty, avg_price}}
         self.trade_log = []
-        self.mode = config.get("mode", "live")
         self.realized_pnl = 0  # P&L from completed trades
         self.unrealized_pnl = 0  # P&L from current holdings
         self.trade_callbacks = []  # Callbacks to notify when trades are executed
@@ -1164,10 +1169,34 @@ class VirtualPortfolio:
     # Mode switching removed - Live trading only (production ready)
 
     def load_portfolio_data(self):
-        """Load existing portfolio data from files."""
+        """Load existing portfolio data from MongoDB first, then JSON fallback."""
         try:
+            mongo_loaded = False
+            if self.mode == "paper":
+                try:
+                    from paper_portfolio_store import load_paper_portfolio
+                    portfolio_data = load_paper_portfolio(
+                        self.username, self.starting_balance)
+                    if portfolio_data:
+                        self.cash = portfolio_data.get(
+                            'cash', self.starting_balance)
+                        self.holdings = portfolio_data.get('holdings', {})
+                        self.realized_pnl = portfolio_data.get(
+                            'realized_pnl', 0)
+                        self.unrealized_pnl = portfolio_data.get(
+                            'unrealized_pnl', 0)
+                        self.starting_balance = portfolio_data.get(
+                            'starting_balance', self.starting_balance)
+                        self.trade_log = portfolio_data.get('trade_log', [])
+                        mongo_loaded = True
+                        logger.info(
+                            f"Loaded paper portfolio from MongoDB: Cash=Rs.{self.cash:.2f}, Holdings={len(self.holdings)} positions, Trades={len(self.trade_log)}")
+                except Exception as e:
+                    logger.warning(
+                        f"MongoDB paper portfolio load failed; using JSON fallback: {e}")
+
             # Load portfolio data
-            if os.path.exists(self.portfolio_file):
+            if not mongo_loaded and os.path.exists(self.portfolio_file):
                 with open(self.portfolio_file, 'r') as f:
                     portfolio_data = json.load(f)
                     self.cash = portfolio_data.get(
@@ -1183,11 +1212,38 @@ class VirtualPortfolio:
                         f"Loaded portfolio: Cash=Rs.{self.cash:.2f}, Holdings={len(self.holdings)} positions")
 
             # Load trade log data
-            if os.path.exists(self.trade_log_file):
+            if not mongo_loaded and os.path.exists(self.trade_log_file):
                 with open(self.trade_log_file, 'r') as f:
                     self.trade_log = json.load(f)
                     logger.info(
                         f"Loaded {len(self.trade_log)} trades from trade log")
+
+            if self.mode == "paper":
+                try:
+                    starting = float(self.starting_balance or 0)
+                    cash = float(self.cash or 0)
+                except (TypeError, ValueError):
+                    starting = cash = 0
+                if starting < PAPER_STARTING_BALANCE:
+                    cash_delta = PAPER_STARTING_BALANCE - max(starting, 0)
+                    self.starting_balance = PAPER_STARTING_BALANCE
+                    self.cash = max(cash, 0) + cash_delta
+                    cash = self.cash
+                    logger.info(
+                        f"Upgraded paper portfolio baseline to Rs.{PAPER_STARTING_BALANCE:.2f}; cash is now Rs.{self.cash:.2f}")
+                    self.save_portfolio()
+                empty_paper_portfolio = not self.holdings and not self.trade_log
+                if empty_paper_portfolio and cash <= 0:
+                    self.starting_balance = PAPER_STARTING_BALANCE
+                    self.cash = PAPER_STARTING_BALANCE
+                    self.realized_pnl = 0
+                    self.unrealized_pnl = 0
+                    logger.info(
+                        f"Reset empty paper portfolio cash to Rs.{self.cash:.2f}")
+                    self.save_portfolio()
+                if not mongo_loaded:
+                    self.save_portfolio()
+                    self.save_trade_log()
         except Exception as e:
             logger.error(f"Error loading portfolio data: {e}")
             # Keep default values if loading fails
@@ -1419,11 +1475,7 @@ class VirtualPortfolio:
                 )
                 logger.info(
                     f"✅ LIVE ORDER PLACED: SELL {qty} {asset} @ Rs.{price} | Result: {order_result}")
-            else:
-                logger.error(
-                    "Broker API not initialized - cannot execute live trade")
-                return False
-
+            
             # Update portfolio regardless of mode
             revenue = qty * price
             self.cash += revenue
@@ -1799,7 +1851,7 @@ class VirtualPortfolio:
             logger.error(f"Error generating paper P&L summary: {e}")
 
     def save_portfolio(self):
-        """Save portfolio state to JSON file."""
+        """Save portfolio state to MongoDB for paper mode and JSON fallback."""
         try:
             portfolio_data = {
                 "cash": self.cash,
@@ -1810,14 +1862,37 @@ class VirtualPortfolio:
             }
             with open(self.portfolio_file, "w") as f:
                 json.dump(portfolio_data, f, indent=4)
+            if self.mode == "paper":
+                try:
+                    from paper_portfolio_store import save_paper_portfolio
+                    save_paper_portfolio(
+                        self.username, portfolio_data, self.trade_log, self.starting_balance)
+                except Exception as mongo_err:
+                    logger.warning(
+                        f"MongoDB paper portfolio save failed; JSON fallback written: {mongo_err}")
         except Exception as e:
             logger.error(f"Error saving portfolio: {e}")
 
     def save_trade_log(self):
-        """Save trade log to JSON file."""
+        """Save trade log to MongoDB for paper mode and JSON fallback."""
         try:
             with open(self.trade_log_file, "w") as f:
                 json.dump(self.trade_log, f, indent=4)
+            if self.mode == "paper":
+                try:
+                    from paper_portfolio_store import save_paper_trade_log
+                    portfolio_data = {
+                        "cash": self.cash,
+                        "holdings": self.holdings,
+                        "starting_balance": self.starting_balance,
+                        "realized_pnl": getattr(self, 'realized_pnl', 0),
+                        "unrealized_pnl": getattr(self, 'unrealized_pnl', 0),
+                    }
+                    save_paper_trade_log(
+                        self.username, self.trade_log, portfolio_data)
+                except Exception as mongo_err:
+                    logger.warning(
+                        f"MongoDB paper trade log save failed; JSON fallback written: {mongo_err}")
         except Exception as e:
             logger.error(f"Error saving trade log: {e}")
 
@@ -6220,7 +6295,7 @@ class Stock:
                 "risk_level": risk_level,
                 "timeframe": timeframe,
                 "explanation": explanation,
-                "ml_analysis": ml_analysis,
+                "model_predictions ": ml_analysis,
                 "market_regime": market_regime,
                 "current_price": float(current_price),
                 "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -9111,8 +9186,8 @@ class StockTradingBot:
 def main():
     config = {
         "tickers": [],  # Empty by default - users can add tickers manually
-        "starting_balance": 10000,  # Default starting balance in INR
-        "current_portfolio_value": 10000,  # Initial portfolio value
+        "starting_balance": 100000,  # Default paper balance in INR
+        "current_portfolio_value": 100000,  # Initial portfolio value
         "current_pnl": 0,  # Initial PnL
         "mode": "paper",
         "dhan_client_id": None,
@@ -9219,8 +9294,8 @@ def main_with_mode():
         # Enhanced configuration with risk management and configurable paths
         config = {
             "tickers": [],  # Empty by default - users can add tickers manually
-            "starting_balance": 10000,  # Rs.10 thousand
-            "current_portfolio_value": 10000,
+            "starting_balance": 100000,  # Rs.1 lakh
+            "current_portfolio_value": 100000,
             "current_pnl": 0,
             "mode": os.getenv("MODE", "paper"),
             "dhan_client_id": None,

@@ -34,8 +34,8 @@ class TradingConfig(BaseModel):
     tickers: List[str] = Field(default_factory=list, description="List of stock tickers to trade")
 
     # Financial settings
-    starting_balance: float = Field(gt=0, default=10000, description="Initial portfolio balance")
-    current_portfolio_value: float = Field(default=10000, description="Current portfolio value")
+    starting_balance: float = Field(gt=0, default=100000, description="Initial portfolio balance")
+    current_portfolio_value: float = Field(default=100000, description="Current portfolio value")
     current_pnl: float = Field(default=0, description="Current profit/loss")
 
     # Risk management
